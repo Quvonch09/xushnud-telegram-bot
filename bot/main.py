@@ -12,10 +12,19 @@ import uvicorn
 import os
 from bot.config import settings
 from aiogram.client.session.aiohttp import AiohttpSession
+from bot.handlers import (
+    start_router,
+    main_menu_router,
+    orders_router,
+    payments_router,
+    referral_router,
+    admin_router
+)
+from bot.middlewares import ThrottlingMiddleware, SubscriptionMiddleware
 
 # Setup proxy for PythonAnywhere free tier or custom proxy if configured
 proxy_url = settings.PROXY_URL or os.environ.get("http_proxy") or os.environ.get("https_proxy")
-if not proxy_url and os.path.exists("/home/Quvonch005") or "pythonanywhere" in os.environ.get("PYTHONANYWHERE_SITE", "").lower() or "pythonanywhere" in os.environ.get("USER", "").lower() or os.path.exists("/var/www"):
+if not proxy_url and (os.path.exists("/home/Quvonch005") or "pythonanywhere" in os.environ.get("PYTHONANYWHERE_SITE", "").lower() or "pythonanywhere" in os.environ.get("USER", "").lower() or os.path.exists("/var/www")):
     proxy_url = "http://proxy.server:3128"
 
 bot_session = AiohttpSession(proxy=proxy_url) if proxy_url else None
