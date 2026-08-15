@@ -1,3 +1,4 @@
+import os
 import httpx
 from typing import List, Optional, Dict, Any
 from loguru import logger
@@ -14,6 +15,9 @@ class SupabaseClient:
             "Content-Type": "application/json",
             "Prefer": "return=representation"
         }
+        self.proxy = settings.PROXY_URL or os.environ.get("http_proxy") or os.environ.get("https_proxy")
+        if not self.proxy and (os.path.exists("/home/Quvonch005") or "pythonanywhere" in os.environ.get("PYTHONANYWHERE_SITE", "").lower() or os.path.exists("/var/www")):
+            self.proxy = "http://proxy.server:3128"
         # In-memory mock storage fallback for local development without active Supabase credentials
         self._mock_users: Dict[int, UserModel] = {}
         self._mock_channels: List[ChannelModel] = [
@@ -66,7 +70,7 @@ class SupabaseClient:
             return self._mock_users.get(telegram_id)
         
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 resp = await client.get(
                     f"{self.base_url}/rest/v1/users?telegram_id=eq.{telegram_id}&select=*",
                     headers=self.headers,
@@ -114,7 +118,7 @@ class SupabaseClient:
             return new_user, True
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 payload = new_user.model_dump(exclude={"id", "created_at"}, exclude_none=True)
                 resp = await client.post(
                     f"{self.base_url}/rest/v1/users",
@@ -139,7 +143,7 @@ class SupabaseClient:
             return
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 await client.patch(
                     f"{self.base_url}/rest/v1/users?telegram_id=eq.{telegram_id}",
                     headers=self.headers,
@@ -171,7 +175,7 @@ class SupabaseClient:
             return True
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 # Update user
                 await client.patch(
                     f"{self.base_url}/rest/v1/users?telegram_id=eq.{referrer_id}",
@@ -205,7 +209,7 @@ class SupabaseClient:
             return True
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 resp = await client.patch(
                     f"{self.base_url}/rest/v1/users?telegram_id=eq.{telegram_id}",
                     headers=self.headers,
@@ -222,7 +226,7 @@ class SupabaseClient:
             return [c for c in self._mock_channels if c.is_active]
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 resp = await client.get(
                     f"{self.base_url}/rest/v1/channels?is_active=eq.true&select=*",
                     headers=self.headers,
@@ -267,7 +271,7 @@ class SupabaseClient:
                 query += f"&category=eq.{category}"
             query += "&order=id.asc"
 
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 resp = await client.get(query, headers=self.headers, timeout=5.0)
                 if resp.status_code == 200:
                     return [ServiceModel(**item) for item in resp.json()]
@@ -290,7 +294,7 @@ class SupabaseClient:
             return None
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 resp = await client.get(
                     f"{self.base_url}/rest/v1/services?id=eq.{service_id}&select=*",
                     headers=self.headers,
@@ -315,7 +319,7 @@ class SupabaseClient:
             return order
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 payload = order.model_dump(exclude={"id", "created_at"}, exclude_none=True)
                 resp = await client.post(
                     f"{self.base_url}/rest/v1/orders",
@@ -340,7 +344,7 @@ class SupabaseClient:
             return list(reversed(user_orders))[:limit]
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 resp = await client.get(
                     f"{self.base_url}/rest/v1/orders?user_telegram_id=eq.{telegram_id}&order=id.desc&limit={limit}&select=*",
                     headers=self.headers,
@@ -359,7 +363,7 @@ class SupabaseClient:
             return payment
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 payload = payment.model_dump(exclude={"id", "created_at"}, exclude_none=True)
                 resp = await client.post(
                     f"{self.base_url}/rest/v1/payments",
@@ -386,7 +390,7 @@ class SupabaseClient:
             return None
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 resp = await client.get(
                     f"{self.base_url}/rest/v1/payments?id=eq.{payment_id}&select=*",
                     headers=self.headers,
@@ -411,7 +415,7 @@ class SupabaseClient:
             return False
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 payload = {"status": status}
                 if amount is not None:
                     payload["amount"] = amount
@@ -433,7 +437,7 @@ class SupabaseClient:
             return users[:limit]
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 resp = await client.get(
                     f"{self.base_url}/rest/v1/users?order=referral_count.desc&limit={limit}&select=*",
                     headers=self.headers,
@@ -454,7 +458,7 @@ class SupabaseClient:
             }
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(proxy=self.proxy) as client:
                 # Count users
                 u_resp = await client.get(f"{self.base_url}/rest/v1/users?select=count", headers={**self.headers, "Prefer": "count=exact"}, timeout=5.0)
                 total_users = int(u_resp.headers.get("content-range", "0/0").split("/")[-1]) if "content-range" in u_resp.headers else 0

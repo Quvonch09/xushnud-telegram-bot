@@ -9,19 +9,19 @@ from aiogram.types import Update
 from loguru import logger
 import uvicorn
 
+import os
 from bot.config import settings
-from bot.handlers import (
-    start_router,
-    main_menu_router,
-    orders_router,
-    payments_router,
-    referral_router,
-    admin_router
-)
-from bot.middlewares import ThrottlingMiddleware, SubscriptionMiddleware
+from aiogram.client.session.aiohttp import AiohttpSession
+
+# Setup proxy for PythonAnywhere free tier or custom proxy if configured
+proxy_url = settings.PROXY_URL or os.environ.get("http_proxy") or os.environ.get("https_proxy")
+if not proxy_url and os.path.exists("/home/Quvonch005") or "pythonanywhere" in os.environ.get("PYTHONANYWHERE_SITE", "").lower() or "pythonanywhere" in os.environ.get("USER", "").lower() or os.path.exists("/var/www"):
+    proxy_url = "http://proxy.server:3128"
+
+bot_session = AiohttpSession(proxy=proxy_url) if proxy_url else None
 
 # Initialize Bot and Dispatcher
-bot = Bot(token=settings.BOT_TOKEN or "MOCK_TOKEN")
+bot = Bot(token=settings.BOT_TOKEN or "MOCK_TOKEN", session=bot_session)
 dp = Dispatcher(storage=MemoryStorage())
 
 # Register Middlewares

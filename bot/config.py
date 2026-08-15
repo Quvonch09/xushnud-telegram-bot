@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     SMM_API_URL: str = Field(default="")
     SMM_API_KEY: str = Field(default="")
 
+    # Proxy (For PythonAnywhere or restricted networks)
+    PROXY_URL: str = Field(default="")
+
     # Webhook / Server
     PORT: int = Field(default=8000)
     HOST: str = Field(default="0.0.0.0")
