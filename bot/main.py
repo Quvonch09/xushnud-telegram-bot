@@ -73,7 +73,7 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.warning(f"Could not set chat menu button: {e}")
 
-        if settings.WEBHOOK_URL:
+        if not settings.USE_POLLING and settings.WEBHOOK_URL:
             webhook_full_url = f"{settings.WEBHOOK_URL.rstrip('/')}{settings.WEBHOOK_PATH}"
             logger.info(f"Setting webhook to {webhook_full_url}")
             await bot.set_webhook(
@@ -84,8 +84,8 @@ async def lifespan(app: FastAPI):
             webhook_info = await bot.get_webhook_info()
             logger.info(f"Telegram Webhook info: {webhook_info}")
         else:
-            logger.info("WEBHOOK_URL not provided. Starting in long-polling mode for local development...")
-            await bot.delete_webhook(drop_pending_updates=True)
+            logger.info("Starting Telegram Bot in long-polling mode (fast and 100% reliable)...")
+            await bot.delete_webhook(drop_pending_updates=False)
             polling_task = asyncio.create_task(dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types()))
     else:
         logger.warning("BOT_TOKEN is not configured or is default mock token.")
@@ -127,6 +127,13 @@ webapp_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file
 if os.path.exists(webapp_dir):
     app.mount("/webapp", StaticFiles(directory=webapp_dir, html=True), name="webapp")
     app.mount("/static", StaticFiles(directory=webapp_dir), name="static")
+    css_dir = os.path.join(webapp_dir, "css")
+    if os.path.exists(css_dir):
+        app.mount("/css", StaticFiles(directory=css_dir), name="css")
+    js_dir = os.path.join(webapp_dir, "js")
+    if os.path.exists(js_dir):
+        app.mount("/js", StaticFiles(directory=js_dir), name="js")
+
 
 @app.api_route("/health", methods=["GET", "HEAD"])
 async def health_check():

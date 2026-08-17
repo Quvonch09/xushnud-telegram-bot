@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     HOST: str = Field(default="0.0.0.0")
     WEBHOOK_URL: str = Field(default="")
     WEBHOOK_PATH: str = Field(default="/webhook")
+    USE_POLLING: bool = Field(default=True)
 
     # Payment & Support
     PAYMENT_CARD_NUMBER: str = Field(default="5614684605929718")

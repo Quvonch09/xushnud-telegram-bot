@@ -6,7 +6,469 @@
     <title>Turfa Seen - Mini App</title>
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* ==========================================================================
+           TELEGRAM MINI APP - CUSTOM THEME & 1:1 SCREENSHOT BLUE STYLES
+           ========================================================================== */
+        :root {
+            /* TELEGRAM EXACT SCREENSHOT COLOR */
+            --btn-telegram-blue: #237dbd;
+            --btn-telegram-hover: #298dce;
+            --btn-telegram-active: #1d6fa8;
+
+            /* 8 TA ASOSIY TUGMA RANGLARI (Customizable) */
+            --color-order: var(--btn-telegram-blue);       /* 🛒 Buyurtma berish */
+            --color-phone: var(--btn-telegram-blue);       /* 📞 Raqam olish */
+            --color-orders: var(--btn-telegram-blue);      /* 🐾 Buyurtmalar */
+            --color-money: var(--btn-telegram-blue);       /* 🐤 Pul ishlash */
+            --color-account: var(--btn-telegram-blue);     /* 💎 Hisobim */
+            --color-deposit: var(--btn-telegram-blue);     /* 💳 Pul kiritish */
+            --color-help: var(--btn-telegram-blue);        /* ? Yordam */
+            --color-partner: var(--btn-telegram-blue);     /* 💻 Hamkorlik dasturi */
+
+            /* Telegram Dark Theme Integration */
+            --tg-bg: var(--tg-theme-bg-color, #0f1821);
+            --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #17212b);
+            --tg-text: var(--tg-theme-text-color, #ffffff);
+            --tg-hint: var(--tg-theme-hint-color, #7f91a4);
+            --tg-link: var(--tg-theme-link-color, #52a7e7);
+            --tg-button: var(--tg-theme-button-color, #237dbd);
+            --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
+
+            /* UI Tokens */
+            --card-bg: rgba(23, 33, 43, 0.9);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --radius-lg: 14px;
+            --radius-md: 11px;
+            --radius-sm: 8px;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --transition-smooth: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: var(--font-family);
+        }
+
+        body {
+            background-color: var(--tg-bg);
+            color: var(--tg-text);
+            min-height: 100vh;
+            padding: 14px;
+            padding-bottom: 30px;
+            overflow-x: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #237dbd;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--tg-text);
+        }
+
+        .user-id {
+            font-size: 12px;
+            color: var(--tg-hint);
+            margin-top: 1px;
+        }
+
+        .badge-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-top: 3px;
+            width: fit-content;
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: #17212b;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 16px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff;
+        }
+
+        .balance-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--tg-hint);
+            font-weight: 600;
+        }
+
+        .balance-amount {
+            font-size: 22px;
+            font-weight: 800;
+            margin-top: 3px;
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+            color: #ffffff;
+        }
+
+        .balance-currency {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--tg-hint);
+        }
+
+        .quick-deposit-btn {
+            background: #237dbd;
+            border: none;
+            color: #ffffff;
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition-smooth);
+        }
+
+        .quick-deposit-btn:active {
+            transform: scale(0.96);
+            background: #1d6fa8;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--tg-hint);
+            margin-top: 2px;
+            margin-bottom: -4px;
+            padding-left: 2px;
+        }
+
+        /* 2-COLUMN BUTTON GRID (1:1 SCREENSHOT LOOK) */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .menu-btn {
+            min-height: 56px;
+            border: none;
+            border-radius: var(--radius-md);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+            transition: transform 0.15s ease, filter 0.15s ease;
+            text-align: center;
+            background: var(--btn-telegram-blue);
+        }
+
+        .menu-btn .btn-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .menu-btn .btn-text {
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .menu-btn:hover {
+            filter: brightness(1.06);
+        }
+
+        .menu-btn:active {
+            transform: scale(0.97);
+            filter: brightness(0.9);
+        }
+
+        /* SUB-VIEWS (Default hidden) */
+        .view-container {
+            display: none;
+            flex-direction: column;
+            gap: 14px;
+            animation: fadeIn 0.2s ease forwards;
+        }
+
+        .view-container.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .view-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2px;
+        }
+
+        .view-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-link-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--tg-text);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--tg-hint);
+        }
+
+        .form-control {
+            background: rgba(15, 24, 33, 0.7);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 11px 13px;
+            color: var(--tg-text);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: #237dbd;
+        }
+
+        .action-btn {
+            width: 100%;
+            min-height: 46px;
+            border: none;
+            border-radius: var(--radius-md);
+            background: #237dbd;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+            transition: var(--transition-smooth);
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+            background: #1d6fa8;
+        }
+
+        .chips-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip-item {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--card-border);
+            color: var(--tg-text);
+            padding: 8px 12px;
+            border-radius: 18px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .chip-item.active {
+            background: #237dbd;
+            color: #ffffff;
+            border-color: transparent;
+        }
+
+        .list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .list-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .list-item-sub {
+            font-size: 12px;
+            color: var(--tg-hint);
+            margin-top: 2px;
+        }
+
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .status-completed { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .status-processing { background: rgba(59, 130, 246, 0.2); color: #38bdf8; }
+
+        .copy-box {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--card-border);
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            margin-top: 8px;
+        }
+
+        .copy-input {
+            background: transparent;
+            border: none;
+            color: var(--tg-text);
+            font-size: 13px;
+            flex: 1;
+            outline: none;
+        }
+
+        .copy-btn {
+            background: #237dbd;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #17212b;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            padding: 10px 18px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">
@@ -50,56 +512,55 @@
             <!-- Menu Title -->
             <div class="section-title">Asosiy menyu</div>
 
-            <!-- 2-COLUMN BUTTON GRID WITH CUSTOM CSS COLORS -->
+            <!-- 2-COLUMN BUTTON GRID WITH 1:1 SCREENSHOT COLORS -->
             <div class="menu-grid">
                 <!-- 1. Buyurtma berish -->
-                <button class="menu-btn order" data-action="order" onclick="handleMenuClick('order')">
+                <button class="menu-btn" data-action="order" onclick="handleMenuClick('order')">
                     <span class="btn-icon">🛒</span>
                     <span class="btn-text">Buyurtma berish</span>
                 </button>
 
                 <!-- 2. Raqam olish -->
-                <button class="menu-btn phone" data-action="phone" onclick="handleMenuClick('phone')">
+                <button class="menu-btn" data-action="phone" onclick="handleMenuClick('phone')">
                     <span class="btn-icon">📞</span>
                     <span class="btn-text">Raqam olish</span>
                 </button>
 
                 <!-- 3. Buyurtmalar -->
-                <button class="menu-btn orders" data-action="orders" onclick="handleMenuClick('orders')">
+                <button class="menu-btn" data-action="orders" onclick="handleMenuClick('orders')">
                     <span class="btn-icon">🐾</span>
                     <span class="btn-text">Buyurtmalar</span>
                 </button>
 
                 <!-- 4. Pul ishlash -->
-                <button class="menu-btn money" data-action="money" onclick="handleMenuClick('money')">
+                <button class="menu-btn" data-action="money" onclick="handleMenuClick('money')">
                     <span class="btn-icon">🐥</span>
                     <span class="btn-text">Pul ishlash</span>
                 </button>
 
                 <!-- 5. Hisobim -->
-                <button class="menu-btn account" data-action="account" onclick="handleMenuClick('account')">
+                <button class="menu-btn" data-action="account" onclick="handleMenuClick('account')">
                     <span class="btn-icon">💎</span>
                     <span class="btn-text">Hisobim</span>
                 </button>
 
                 <!-- 6. Pul kiritish -->
-                <button class="menu-btn deposit" data-action="deposit" onclick="handleMenuClick('deposit')">
+                <button class="menu-btn" data-action="deposit" onclick="handleMenuClick('deposit')">
                     <span class="btn-icon">💳</span>
                     <span class="btn-text">Pul kiritish</span>
                 </button>
 
                 <!-- 7. Yordam -->
-                <button class="menu-btn help" data-action="help" onclick="handleMenuClick('help')">
-                    <span class="btn-icon" style="font-weight:900; font-size:18px;">?</span>
+                <button class="menu-btn" data-action="help" onclick="handleMenuClick('help')">
+                    <span class="btn-icon" style="font-weight:900; font-size:17px;">?</span>
                     <span class="btn-text">Yordam</span>
                 </button>
 
                 <!-- 8. Hamkorlik dasturi -->
-                <button class="menu-btn partner" data-action="partner" onclick="handleMenuClick('partner')">
+                <button class="menu-btn" data-action="partner" onclick="handleMenuClick('partner')">
                     <span class="btn-icon">💻</span>
                     <span class="btn-text">Hamkorlik dasturi</span>
                 </button>
-
             </div>
         </main>
 
@@ -142,9 +603,9 @@
                     <input type="number" id="order-quantity-input" class="form-control" placeholder="Masalan: 1000" min="10" value="100" oninput="calculateOrderPrice()">
                 </div>
 
-                <div style="margin: 12px 0; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 14px; color: var(--tg-hint);">Jami narx:</span>
-                    <strong style="font-size: 18px; color: #22c55e;" id="order-total-price">0 so'm</strong>
+                <div style="margin: 12px 0; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: var(--tg-hint);">Jami narx:</span>
+                    <strong style="font-size: 17px; color: #22c55e;" id="order-total-price">0 so'm</strong>
                 </div>
 
                 <button class="action-btn" onclick="submitOrder()">
@@ -162,18 +623,18 @@
                 <button class="back-link-btn" onclick="navigateTo('dashboard')">← Orqaga</button>
             </div>
             <div class="card">
-                <div style="text-align: center; padding: 10px 0;">
-                    <div style="font-size: 40px; margin-bottom: 10px;">📲</div>
-                    <h3 style="font-size: 17px; margin-bottom: 8px;">Tayyor Telegram hisoblari</h3>
-                    <p style="font-size: 13px; color: var(--tg-hint); line-height: 1.5;">
-                        Telegram uchun spam bo'lmagan, ishonchli va faol virtual raqamlar hamda tayyor hisoblar mavjud.
+                <div style="text-align: center; padding: 6px 0;">
+                    <div style="font-size: 36px; margin-bottom: 8px;">📲</div>
+                    <h3 style="font-size: 16px; margin-bottom: 6px;">Tayyor Telegram hisoblari</h3>
+                    <p style="font-size: 13px; color: var(--tg-hint); line-height: 1.4;">
+                        Telegram uchun spam bo'lmagan, ishonchli va faol virtual raqamlar mavjud.
                     </p>
                 </div>
-                <div class="list-container" style="margin-top: 14px;">
+                <div class="list-container" style="margin-top: 12px;">
                     <div class="list-item">
                         <div>
                             <div class="list-item-title">🇺🇿 O'zbekiston (+998)</div>
-                            <div class="list-item-sub">Tayyor SMS hisob</div>
+                            <div class="list-item-sub">Tayyor hisob</div>
                         </div>
                         <span class="status-badge status-completed">Mavjud</span>
                     </div>
@@ -184,15 +645,8 @@
                         </div>
                         <span class="status-badge status-completed">Mavjud</span>
                     </div>
-                    <div class="list-item">
-                        <div>
-                            <div class="list-item-title">🇺🇸 AQSH (+1)</div>
-                            <div class="list-item-sub">Virtual raqam</div>
-                        </div>
-                        <span class="status-badge status-completed">Mavjud</span>
-                    </div>
                 </div>
-                <button class="action-btn" onclick="contactAdmin('raqam_olish')" style="margin-top: 16px;">
+                <button class="action-btn" onclick="contactAdmin('raqam_olish')" style="margin-top: 14px;">
                     💬 Admin orqali xarid qilish
                 </button>
             </div>
@@ -203,12 +657,11 @@
         <!-- ============================================================ -->
         <section id="view-orders" class="view-container">
             <div class="view-header">
-                <h2>🛍️ Mening buyurtmalarim</h2>
+                <h2>🐾 Mening buyurtmalarim</h2>
                 <button class="back-link-btn" onclick="navigateTo('dashboard')">← Orqaga</button>
             </div>
             <div class="card">
                 <div class="list-container" id="orders-list">
-                    <!-- Dynamic Orders List -->
                     <div class="list-item">
                         <div>
                             <div class="list-item-title">Telegram Obunachi (1 000 ta)</div>
@@ -232,32 +685,32 @@
         <!-- ============================================================ -->
         <section id="view-money" class="view-container">
             <div class="view-header">
-                <h2>🤑 Pul ishlash</h2>
+                <h2>🐥 Pul ishlash</h2>
                 <button class="back-link-btn" onclick="navigateTo('dashboard')">← Orqaga</button>
             </div>
             <div class="card">
-                <h3 style="font-size: 16px; margin-bottom: 6px;">🔗 Sizning taklif havolangiz</h3>
+                <h3 style="font-size: 15px; margin-bottom: 4px;">🔗 Sizning taklif havolangiz</h3>
                 <p style="font-size: 13px; color: var(--tg-hint); line-height: 1.4;">
-                    Do'stlaringizni taklif qiling va har bir do'stingiz uchun <b>80 so'm</b> bonusga ega bo'ling!
+                    Do'stlaringizni taklif qiling va har bir do'stingiz uchun <b>80 so'm</b> oling!
                 </p>
 
                 <div class="copy-box">
                     <input type="text" id="referral-link" class="copy-input" value="https://t.me/TurfaSeenBot?start=user000" readonly>
-                    <button class="copy-btn" onclick="copyReferralLink()">Nusxalash</button>
+                    <button class="copy-btn" onclick="copyReferralLink()">Nusxa</button>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px;">
-                    <div style="background: rgba(255,255,255,0.04); padding: 12px; border-radius: 12px; text-align: center;">
-                        <div style="font-size: 12px; color: var(--tg-hint);">Taklif qilinganlar</div>
-                        <div style="font-size: 20px; font-weight: 800; color: #38bdf8; margin-top: 4px;" id="referral-count">0 ta</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+                    <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 11px; color: var(--tg-hint);">Taklif qilinganlar</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #38bdf8; margin-top: 2px;" id="referral-count">0 ta</div>
                     </div>
-                    <div style="background: rgba(255,255,255,0.04); padding: 12px; border-radius: 12px; text-align: center;">
-                        <div style="font-size: 12px; color: var(--tg-hint);">Topilgan daromad</div>
-                        <div style="font-size: 20px; font-weight: 800; color: #22c55e; margin-top: 4px;" id="referral-earnings">0 so'm</div>
+                    <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 11px; color: var(--tg-hint);">Topilgan daromad</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #22c55e; margin-top: 2px;" id="referral-earnings">0 so'm</div>
                     </div>
                 </div>
 
-                <button class="action-btn" onclick="shareReferralLink()" style="margin-top: 16px;">
+                <button class="action-btn" onclick="shareReferralLink()" style="margin-top: 14px;">
                     📢 Telegram orqali ulashish
                 </button>
             </div>
@@ -291,16 +744,9 @@
                             <div class="list-item-sub" id="acc-total-deposit">0 so'm</div>
                         </div>
                     </div>
-                    <div class="list-item">
-                        <div>
-                            <div class="list-item-title">Hisob holati</div>
-                            <div class="list-item-sub">Standart foydalanuvchi</div>
-                        </div>
-                        <span class="status-badge status-completed">Aktiv</span>
-                    </div>
                 </div>
 
-                <button class="action-btn" onclick="navigateTo('deposit')" style="margin-top: 16px;">
+                <button class="action-btn" onclick="navigateTo('deposit')" style="margin-top: 14px;">
                     💳 Balansni to'ldirish
                 </button>
             </div>
@@ -324,13 +770,13 @@
                     </div>
                 </div>
 
-                <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--card-border); padding: 14px; border-radius: 14px; margin-bottom: 14px;">
-                    <div style="font-size: 12px; color: var(--tg-hint);">Karta raqami:</div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
-                        <strong style="font-size: 16px; letter-spacing: 1px;" id="payment-card-num">5614 6846 0592 9718</strong>
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; margin-bottom: 12px;">
+                    <div style="font-size: 11px; color: var(--tg-hint);">Karta raqami:</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 3px;">
+                        <strong style="font-size: 15px; letter-spacing: 1px;" id="payment-card-num">5614 6846 0592 9718</strong>
                         <button class="copy-btn" onclick="copyCardNumber()">Nusxa</button>
                     </div>
-                    <div style="font-size: 12px; color: var(--tg-hint); margin-top: 8px;">Izoh: <b id="payment-comment">8048583227</b></div>
+                    <div style="font-size: 11px; color: var(--tg-hint); margin-top: 6px;">Izoh: <b id="payment-comment">8048583227</b></div>
                 </div>
 
                 <div class="form-group">
@@ -349,12 +795,12 @@
         <!-- ============================================================ -->
         <section id="view-help" class="view-container">
             <div class="view-header">
-                <h2>❓ Yordam va Qo'llab-quvvatlash</h2>
+                <h2>? Yordam va Qo'llab-quvvatlash</h2>
                 <button class="back-link-btn" onclick="navigateTo('dashboard')">← Orqaga</button>
             </div>
             <div class="card">
-                <p style="font-size: 14px; line-height: 1.6; color: var(--tg-text); margin-bottom: 16px;">
-                    Turfa Seen boti orqali barcha ommabop ijtimoiy tarmoqlar uchun obunachi, ko'rishlar, layklar va boshqa faolliklarni avtomatik tarzda buyurtma qilishingiz mumkin.
+                <p style="font-size: 13px; line-height: 1.5; color: var(--tg-text); margin-bottom: 14px;">
+                    Turfa Seen orqali obunachi, ko'rishlar, layklar va boshqa faolliklarni avtomatik tarzda buyurtma qilishingiz mumkin.
                 </p>
 
                 <div class="list-container">
@@ -385,12 +831,12 @@
                 <button class="back-link-btn" onclick="navigateTo('dashboard')">← Orqaga</button>
             </div>
             <div class="card">
-                <div style="font-size: 14px; line-height: 1.6;">
-                    <h3 style="font-size: 16px; margin-bottom: 8px;">🤝 Biz bilan hamkorlik qiling!</h3>
-                    <p style="color: var(--tg-hint); margin-bottom: 12px;">
-                        Katta auditoriyaga ega kanallar, blogerlar va SMM mutaxassislari uchun maxsus shartlar va bonusli takliflar mavjud.
+                <div style="font-size: 13px; line-height: 1.5;">
+                    <h3 style="font-size: 15px; margin-bottom: 6px;">🤝 Biz bilan hamkorlik qiling!</h3>
+                    <p style="color: var(--tg-hint); margin-bottom: 10px;">
+                        Katta auditoriyaga ega kanallar va SMM mutaxassislari uchun maxsus shartlar mavjud:
                     </p>
-                    <ul style="padding-left: 20px; color: var(--tg-text); margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px;">
+                    <ul style="padding-left: 18px; color: var(--tg-text); margin-bottom: 14px; display: flex; flex-direction: column; gap: 4px;">
                         <li>Maxsus ulgurji narxlar</li>
                         <li>Individual API integratsiyasi</li>
                         <li>24/7 tezkor texnik yordam</li>
@@ -405,6 +851,267 @@
     </div>
 
     <!-- Application Logic -->
-    <script src="js/app.js"></script>
+    <script>
+        const tg = window.Telegram?.WebApp || {
+            ready: () => {},
+            expand: () => {},
+            close: () => {},
+            sendData: (data) => console.log("Telegram sendData:", data),
+            openTelegramLink: (url) => window.open(url, "_blank"),
+            openLink: (url) => window.open(url, "_blank"),
+            HapticFeedback: {
+                impactOccurred: () => {},
+                notificationOccurred: () => {},
+                selectionChanged: () => {}
+            },
+            BackButton: {
+                show: () => {},
+                hide: () => {},
+                onClick: () => {}
+            },
+            initData: "",
+            initDataUnsafe: {}
+        };
+
+        try {
+            tg.ready();
+            tg.expand();
+        } catch (e) {}
+
+        const state = {
+            user: {
+                id: 0,
+                username: "Foydalanuvchi",
+                firstName: "Foydalanuvchi",
+                balance: 0,
+                totalDeposit: 0,
+                referralsCount: 0,
+                referralEarnings: 0
+            },
+            selectedPlatform: "Telegram",
+            selectedCategory: "Obunachi",
+            currentView: "dashboard",
+            botUsername: "TurfaSeenBot",
+            supportAdmin: "quvonchbek_070",
+            channelUrl: "https://t.me/quvonch_blog"
+        };
+
+        const servicePrices = {
+            "Telegram": { "Obunachi": 15000, "Ko'rishlar": 800, "Reaksiya": 1200, "Boost ovoz": 45000 },
+            "Instagram": { "Obunachi": 22000, "Ko'rishlar": 1000, "Reaksiya": 8000, "Boost ovoz": 20000 },
+            "YouTube": { "Obunachi": 75000, "Ko'rishlar": 18000, "Reaksiya": 15000, "Boost ovoz": 30000 },
+            "TikTok": { "Obunachi": 35000, "Ko'rishlar": 1500, "Reaksiya": 12000, "Boost ovoz": 25000 }
+        };
+
+        const toastEl = document.getElementById("toast");
+        const userNameEl = document.getElementById("user-name");
+        const userIdEl = document.getElementById("user-id");
+        const userAvatarEl = document.getElementById("user-avatar");
+        const userInitialsEl = document.getElementById("user-initials");
+        const userBalanceEl = document.getElementById("user-balance");
+
+        function formatNumber(num) {
+            return (num || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        function showToast(message, duration = 2500) {
+            if (!toastEl) return;
+            toastEl.textContent = message;
+            toastEl.classList.add("show");
+            setTimeout(() => toastEl.classList.remove("show"), duration);
+        }
+
+        function haptic(type = "light") {
+            try {
+                if (tg.HapticFeedback) {
+                    if (type === "success" || type === "error") {
+                        tg.HapticFeedback.notificationOccurred(type);
+                    } else {
+                        tg.HapticFeedback.impactOccurred(type);
+                    }
+                }
+            } catch (e) {}
+        }
+
+        function navigateTo(viewName) {
+            haptic("light");
+            document.querySelectorAll(".view-container").forEach(el => el.classList.remove("active"));
+
+            const target = document.getElementById(`view-${viewName}`);
+            if (target) {
+                target.classList.add("active");
+                state.currentView = viewName;
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+
+            if (viewName === "dashboard") {
+                try { tg.BackButton?.hide(); } catch (e) {}
+            } else {
+                try {
+                    tg.BackButton?.show();
+                    tg.BackButton?.onClick(() => navigateTo("dashboard"));
+                } catch (e) {}
+            }
+
+            if (viewName === "order") calculateOrderPrice();
+        }
+
+        function handleMenuClick(action) {
+            haptic("medium");
+            navigateTo(action);
+        }
+
+        function selectPlatform(buttonEl, platform) {
+            document.querySelectorAll("#platform-chips .chip-item").forEach(b => b.classList.remove("active"));
+            buttonEl.classList.add("active");
+            state.selectedPlatform = platform;
+            calculateOrderPrice();
+        }
+
+        function updateServiceOptions() {
+            const select = document.getElementById("service-category-select");
+            if (select) {
+                state.selectedCategory = select.value;
+                calculateOrderPrice();
+            }
+        }
+
+        function calculateOrderPrice() {
+            const qtyInput = document.getElementById("order-quantity-input");
+            const totalEl = document.getElementById("order-total-price");
+            const qty = parseInt(qtyInput?.value || "0", 10);
+            const pricePer1000 = servicePrices[state.selectedPlatform]?.[state.selectedCategory] || 15000;
+            const total = Math.round((qty * pricePer1000) / 1000);
+            if (totalEl) totalEl.textContent = `${formatNumber(total)} so'm`;
+            return total;
+        }
+
+        async function submitOrder() {
+            const linkInput = document.getElementById("order-link-input");
+            const qtyInput = document.getElementById("order-quantity-input");
+            const link = linkInput?.value.trim();
+            const qty = parseInt(qtyInput?.value || "0", 10);
+            const totalCost = calculateOrderPrice();
+
+            if (!link) {
+                haptic("error");
+                showToast("⚠️ Iltimos, havola kiriting!");
+                return;
+            }
+            if (qty < 10) {
+                haptic("error");
+                showToast("⚠️ Minimal miqdor: 10 ta");
+                return;
+            }
+            if (state.user.balance < totalCost) {
+                haptic("warning");
+                showToast("❌ Hisobingizda mablag' yetarli emas!");
+                setTimeout(() => navigateTo("deposit"), 1200);
+                return;
+            }
+
+            haptic("success");
+            showToast("🎉 Buyurtma qabul qilindi!");
+            if (linkInput) linkInput.value = "";
+            setTimeout(() => navigateTo("orders"), 1500);
+        }
+
+        function contactAdmin(reason = "help") {
+            const url = `https://t.me/${state.supportAdmin}`;
+            if (tg.openTelegramLink) tg.openTelegramLink(url);
+            else window.open(url, "_blank");
+        }
+
+        function openChannel() {
+            if (tg.openTelegramLink) tg.openTelegramLink(state.channelUrl);
+            else window.open(state.channelUrl, "_blank");
+        }
+
+        function copyReferralLink() {
+            const input = document.getElementById("referral-link");
+            if (!input) return;
+            navigator.clipboard.writeText(input.value).then(() => {
+                haptic("success");
+                showToast("✅ Havola nusxalandi!");
+            });
+        }
+
+        function shareReferralLink() {
+            const link = document.getElementById("referral-link")?.value || "";
+            const text = encodeURIComponent(`🚀 SMM xizmatlari:\n${link}`);
+            const shareUrl = `https://t.me/share/url?url=${link}&text=${text}`;
+            if (tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+            else window.open(shareUrl, "_blank");
+        }
+
+        function selectPaymentSystem(buttonEl, system) {
+            buttonEl.parentElement.querySelectorAll(".chip-item").forEach(b => b.classList.remove("active"));
+            buttonEl.classList.add("active");
+        }
+
+        function copyCardNumber() {
+            const cardEl = document.getElementById("payment-card-num");
+            const num = cardEl?.textContent.replace(/\s+/g, "") || "5614684605929718";
+            navigator.clipboard.writeText(num).then(() => {
+                haptic("success");
+                showToast("💳 Karta raqami nusxalandi!");
+            });
+        }
+
+        function submitDeposit() {
+            const amount = parseInt(document.getElementById("deposit-amount-input")?.value || "0", 10);
+            if (isNaN(amount) || amount < 1000) {
+                haptic("error");
+                showToast("⚠️ Minimal to'lov: 1 000 so'm");
+                return;
+            }
+            try {
+                if (tg.sendData) {
+                    tg.sendData(JSON.stringify({ action: "deposit", amount }));
+                }
+            } catch (e) {}
+            showToast("✅ To'lov chekini botga yuboring!");
+            setTimeout(() => navigateTo("dashboard"), 1500);
+        }
+
+        async function initUser() {
+            const tgUser = tg.initDataUnsafe?.user;
+            if (tgUser) {
+                state.user.id = tgUser.id;
+                state.user.username = tgUser.username || `user${tgUser.id}`;
+                state.user.firstName = tgUser.first_name || "Foydalanuvchi";
+                if (tgUser.photo_url) {
+                    userAvatarEl.innerHTML = `<img src="${tgUser.photo_url}" alt="Avatar">`;
+                } else {
+                    userInitialsEl.textContent = (state.user.firstName || "U").charAt(0).toUpperCase();
+                }
+            }
+            userNameEl.textContent = state.user.firstName;
+            userIdEl.textContent = `ID: ${state.user.id || "12345678"}`;
+            const accUserId = document.getElementById("acc-user-id");
+            if (accUserId) accUserId.textContent = state.user.id || "12345678";
+
+            const refLink = document.getElementById("referral-link");
+            if (refLink) refLink.value = `https://t.me/${state.botUsername}?start=user${state.user.id || "000"}`;
+
+            try {
+                const res = await fetch(`/api/user?user_id=${state.user.id}`);
+                if (res.ok) {
+                    const d = await res.json();
+                    state.user.balance = d.balance ?? 0;
+                    state.user.totalDeposit = d.total_deposit ?? 0;
+                    state.user.referralsCount = d.referrals_count ?? 0;
+                }
+            } catch (e) {}
+
+            userBalanceEl.textContent = formatNumber(state.user.balance);
+            const accBal = document.getElementById("acc-balance");
+            if (accBal) accBal.textContent = `${formatNumber(state.user.balance)} so'm`;
+            const accDep = document.getElementById("acc-total-deposit");
+            if (accDep) accDep.textContent = `${formatNumber(state.user.totalDeposit)} so'm`;
+        }
+
+        window.addEventListener("DOMContentLoaded", initUser);
+    </script>
 </body>
 </html>
