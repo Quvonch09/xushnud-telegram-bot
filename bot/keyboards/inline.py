@@ -1,7 +1,22 @@
 from typing import List, Optional
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from bot.database.models import ChannelModel, ServiceModel
 from bot.config import settings
+
+def get_webapp_keyboard(url: Optional[str] = None) -> InlineKeyboardMarkup:
+    """
+    Returns inline keyboard with 🚀 Ilovani ochish (Mini App) button.
+    """
+    target_url = url or settings.effective_webapp_url
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text="🚀 Ilovani ochish",
+                web_app=WebAppInfo(url=target_url)
+            )
+        ]
+    ])
+
 
 def get_subscription_keyboard(channels: List[ChannelModel]) -> InlineKeyboardMarkup:
     """

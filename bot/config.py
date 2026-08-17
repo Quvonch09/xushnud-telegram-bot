@@ -38,8 +38,12 @@ class Settings(BaseSettings):
     SUPPORT_ADMIN: str = Field(default="@inqiIob")
     OFFICIAL_CHANNEL: str = Field(default="@TurfaSeen")
     WEBSITE_URL: str = Field(default="https://turfaseen.netlify.app")
+    WEBAPP_URL: str = Field(default="")
 
     @property
+    def effective_webapp_url(self) -> str:
+        return self.WEBAPP_URL or self.WEBSITE_URL or "https://turfaseen.netlify.app"
+
     def admin_ids(self) -> List[int]:
         if not self.ADMIN_IDS_RAW:
             return []

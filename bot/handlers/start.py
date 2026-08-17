@@ -1,10 +1,11 @@
+import json
 from aiogram import Router, Bot, F
 from aiogram.filters import CommandStart, CommandObject
 from aiogram.types import Message, CallbackQuery
 from loguru import logger
 from bot.database import db
 from bot.keyboards.reply import get_main_menu_keyboard
-from bot.keyboards.inline import get_subscription_keyboard
+from bot.keyboards.inline import get_subscription_keyboard, get_webapp_keyboard
 from bot.middlewares.subscription_check import check_user_subscriptions
 from bot.config import settings
 
@@ -62,7 +63,17 @@ async def cmd_start(message: Message, command: CommandObject, bot: Bot):
             )
             return
 
-    # Show Main Menu
+    # Show Main Menu & Mini App Button
+    welcome_text = (
+        f"Assalomu alaykum, <b>{first_name or 'foydalanuvchi'}</b>!\n\n"
+        "🚀 <b>Turfa Seen</b> platformasiga xush kelibsiz!\n"
+        "Quyidagi <b>'🚀 Ilovani ochish'</b> tugmasi orqali qulay va zamonaviy Mini App interfeysidan foydalanishingiz mumkin."
+    )
+    await message.answer(
+        welcome_text,
+        parse_mode="HTML",
+        reply_markup=get_webapp_keyboard()
+    )
     await message.answer(
         "📩 Asosiy menyudasiz",
         reply_markup=get_main_menu_keyboard()
@@ -84,4 +95,47 @@ async def callback_check_subs(callback: CallbackQuery, bot: Bot):
         await callback.message.delete()
     except Exception:
         pass
+    
+    await callback.message.answer(
+        "🚀 <b>Turfa Seen Mini App</b>",
+        parse_mode="HTML",
+        reply_markup=get_webapp_keyboard()
+    )
     await callback.message.answer("📩 Asosiy menyudasiz", reply_markup=get_main_menu_keyboard())
+
+# --- WEB APP DATA RECEIVER ---
+@start_router.message(F.web_app_data)
+async def handle_web_app_data(message: Message, bot: Bot):
+    """
+    Handles data payload sent via tg.sendData(...) from the Telegram Mini App.
+    """
+    try:
+        raw_data = message.web_app_data.data
+        data = json.loads(raw_data)
+        action = data.get("action")
+
+        if action == "deposit":
+            amount = data.get("amount", 0)
+            text = (
+                f"💳 <b>Pul kiritish so'rovi qabul qilindi!</b>\n\n"
+                f"Kiritiladigan summa: <b>{amount:,} so'm</b>\n"
+                f"Karta raqami: <code>{settings.PAYMENT_CARD_NUMBER}</code>\n"
+                f"Izoh (Comment): <code>{settings.PAYMENT_COMMENT}</code>\n\n"
+                "Iltimos, to'lovni amalga oshirgach, chek rasmini botga yuboring."
+            ).replace(",", " ")
+            await message.answer(text, parse_mode="HTML")
+        elif action == "order":
+            await message.answer("🛒 Buyurtma berish bo'limi Mini App ichida ochildi.")
+        elif action == "orders":
+            await message.answer("🛍️ Buyurtmalaringiz holatini Mini App yoki menyu orqali ko'rishingiz mumkin.")
+        elif action == "account":
+            user = await db.get_user(message.from_user.id)
+            bal = f"{user.balance:,} so'm".replace(",", " ") if user else "0 so'm"
+            await message.answer(f"💎 Hisobingiz balansi: <b>{bal}</b>", parse_mode="HTML")
+        elif action == "help":
+            await message.answer(f"❓ Savollar bo'yicha adminga murojaat qiling: {settings.SUPPORT_ADMIN}")
+        else:
+            logger.info(f"Received web_app_data action: {action}")
+    except Exception as e:
+        logger.error(f"Error processing web_app_data: {e}")
+

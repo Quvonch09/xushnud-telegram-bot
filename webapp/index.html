@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Turfa Seen - Mini App</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Toast Notification Element -->
+        <div id="toast" class="toast">Xabarnoma</div>
+
+        <!-- ============================================================ -->
+        <!-- DASHBOARD (MAIN VIEW) -->
+        <!-- ============================================================ -->
+        <main id="view-dashboard" class="view-container active">
+            <!-- User Profile Card -->
+            <section class="profile-card">
+                <div class="user-info">
+                    <div class="avatar" id="user-avatar">
+                        <span id="user-initials">U</span>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name" id="user-name">Foydalanuvchi</span>
+                        <span class="user-id" id="user-id">ID: 00000000</span>
+                        <div class="badge-tag">
+                            <span>●</span> Faol hisob
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Balance Card -->
+            <section class="balance-card">
+                <div>
+                    <div class="balance-label">Hisob balansi</div>
+                    <div class="balance-amount">
+                        <span id="user-balance">0</span>
+                        <span class="balance-currency">so'm</span>
+                    </div>
+                </div>
+                <button class="quick-deposit-btn" onclick="navigateTo('deposit')">
+                    <span>➕</span> To'ldirish
+                </button>
+            </section>
+
+            <!-- Menu Title -->
+            <div class="section-title">Asosiy menyu</div>
+
+            <!-- 2-COLUMN BUTTON GRID WITH CUSTOM CSS COLORS -->
+            <div class="menu-grid">
+                <!-- 1. Buyurtma berish -->
+                <button class="menu-btn order" data-action="order" onclick="handleMenuClick('order')">
+                    <span class="btn-icon">🛒</span>
+                    <span class="btn-text">Buyurtma berish</span>
+                </button>
+
+                <!-- 2. Raqam olish -->
+                <button class="menu-btn phone" data-action="phone" onclick="handleMenuClick('phone')">
+                    <span class="btn-icon">📞</span>
+                    <span class="btn-text">Raqam olish</span>
+                </button>
+
+                <!-- 3. Buyurtmalar -->
+                <button class="menu-btn orders" data-action="orders" onclick="handleMenuClick('orders')">
+                    <span class="btn-icon">🐾</span>
+                    <span class="btn-text">Buyurtmalar</span>
+                </button>
+
+                <!-- 4. Pul ishlash -->
+                <button class="menu-btn money" data-action="money" onclick="handleMenuClick('money')">
+                    <span class="btn-icon">🐥</span>
+                    <span class="btn-text">Pul ishlash</span>
+                </button>
+
+                <!-- 5. Hisobim -->
+                <button class="menu-btn account" data-action="account" onclick="handleMenuClick('account')">
+                    <span class="btn-icon">💎</span>
+                    <span class="btn-text">Hisobim</span>
+                </button>
+
+                <!-- 6. Pul kiritish -->
+                <button class="menu-btn deposit" data-action="deposit" onclick="handleMenuClick('deposit')">
+                    <span class="btn-icon">💳</span>
+                    <span class="btn-text">Pul kiritish</span>
+                </button>
+
+                <!-- 7. Yordam -->
+                <button class="menu-btn help" data-action="help" onclick="handleMenuClick('help')">
+                    <span class="btn-icon" style="font-weight:900; font-size:18px;">?</span>
+                    <span class="btn-text">Yordam</span>
+                </button>
+
+                <!-- 8. Hamkorlik dasturi -->
+                <button class="menu-btn partner" data-action="partner" onclick="handleMenuClick('partner')">
+                    <span class="btn-icon">💻</span>
+                    <span class="btn-text">Hamkorlik dasturi</span>
+                </button>
+
+            </div>
+        </main>
+
+        <!-- ============================================================ -->
+        <!-- 1. BUYURTMA BERISH VIEW -->
+        <!-- ============================================================ -->
+        <section id="view-order" class="view-container">
+            <div class="view-header">
+                <h2>🛒 Buyurtma berish</h2>
+                <button class="back-link-btn" onclick="navigateTo('dashboard')">← Orqaga</button>
+            </div>
+            <div class="card">
+                <div class="form-group">
+                    <label class="form-label">Ijtimoiy tarmoqni tanlang:</label>
+                    <div class="chips-grid" id="platform-chips">
+                        <button class="chip-item active" onclick="selectPlatform(this, 'Telegram')">✈️ Telegram</button>
+                        <button class="chip-item" onclick="selectPlatform(this, 'Instagram')">📸 Instagram</button>
+                        <button class="chip-item" onclick="selectPlatform(this, 'YouTube')">▶️ YouTube</button>
+                        <button class="chip-item" onclick="selectPlatform(this, 'TikTok')">🎵 TikTok</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Xizmat turini tanlang:</label>
+                    <select id="service-category-select" class="form-control" onchange="updateServiceOptions()">
+                        <option value="Obunachi">👤 Obunachi / Followers</option>
+                        <option value="Ko'rishlar">👁️ Ko'rishlar / Views</option>
+                        <option value="Reaksiya">🔥 Reaksiya / Reactions</option>
+                        <option value="Boost ovoz">🔊 Boost ovoz</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Havola (Link):</label>
+                    <input type="url" id="order-link-input" class="form-control" placeholder="https://t.me/kanal_nomi yoki post">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Miqdor (Quantity):</label>
+                    <input type="number" id="order-quantity-input" class="form-control" placeholder="Masalan: 1000" min="10" value="100" oninput="calculateOrderPrice()">
+                </div>
+
+                <div style="margin: 12px 0; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 14px; color: var(--tg-hint);">Jami narx:</span>
+                    <strong style="font-size: 18px; color: #22c55e;" id="order-total-price">0 so'm</strong>
+                </div>
+
+                <button class="action-btn" onclick="submitOrder()">
+                    🚀 Buyurtmani rasmiylashtirish
+                </button>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 2. RAQAM OLISH VIEW -->
+        <!-- ============================================================ -->
+        <section id="view-phone" class="view-container">
+            <div class="view-header">
+                <h2>📞 Raqam olish</h2>
+                <button class="back-link-btn" onclick="navigateTo('dashboard')">← Orqaga</button>
+            </div>
+            <div class="card">
+                <div style="text-align: center; padding: 10px 0;">
+                    <div style="font-size: 40px; margin-bottom: 10px;">📲</div>
+                    <h3 style="font-size: 17px; margin-bottom: 8px;">Tayyor Telegram hisoblari</h3>
+                    <p style="font-size: 13px; color: var(--tg-hint); line-height: 1.5;">
+                        Telegram uchun spam bo'lmagan, ishonchli va faol virtual raqamlar hamda tayyor hisoblar mavjud.
+                    </p>
+                </div>
+                <div class="list-container" style="margin-top: 14px;">
+                    <div class="list-item">
+                        <div>
+                            <div class="list-item-title">🇺🇿 O'zbekiston (+998)</div>
+                            <div class="list-item-sub">Tayyor SMS hisob</div>
+                        </div>
+                        <span class="status-badge status-completed">Mavjud</span>
+                    </div>
+                    <div class="list-item">
+                        <div>
+                            <div class="list-item-title">🇷🇺 Rossiya (+7)</div>
+                            <div class="list-item-sub">SMS aktivatsiya</div>
+                        </div>
+                        <span class="status-badge status-completed">Mavjud</span>
+                    </div>
+                    <div class="list-item">
+                        <div>
+                            <div class="list-item-title">🇺🇸 AQSH (+1)</div>
+                            <div class="list-item-sub">Virtual raqam</div>
+                        </div>
+                        <span class="status-badge status-completed">Mavjud</span>
+                    </div>
+                </div>
+                <button class="action-btn" onclick="contactAdmin('raqam_olish')" style="margin-top: 16px;">
+                    💬 Admin orqali xarid qilish
+                </button>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3. BUYURTMALAR VIEW -->
+        <!-- ============================================================ -->
+        <section id="view-orders" class="view-container">
+            <div class="view-header">
+                <h2>🛍️ Mening buyurtmalarim</h2>
+                <button class="back-link-btn" onclick="navigateTo('dashboard')">← Orqaga</button>
+            </div>
+            <div class="card">
+                <div class="list-container" id="orders-list">
+                    <!-- Dynamic Orders List -->
+                    <div class="list-item">
+                        <div>
+                            <div class="list-item-title">Telegram Obunachi (1 000 ta)</div>
+                            <div class="list-item-sub">#1024 • 15 000 so'm</div>
+                        </div>
+                        <span class="status-badge status-completed">Bajarildi</span>
+                    </div>
+                    <div class="list-item">
+                        <div>
+                            <div class="list-item-title">Instagram Like (500 ta)</div>
+                            <div class="list-item-sub">#1025 • 4 000 so'm</div>
+                        </div>
+                        <span class="status-badge status-processing">Jarayonda</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4. PUL ISHLASH VIEW -->
+        <!-- ============================================================ -->
+        <section id="view-money" class="view-container">
+            <div class="view-header">
+                <h2>🤑 Pul ishlash</h2>
+                <button class="back-link-btn" onclick="navigateTo('dashboard')">← Orqaga</button>
+            </div>
+            <div class="card">
+                <h3 style="font-size: 16px; margin-bottom: 6px;">🔗 Sizning taklif havolangiz</h3>
+                <p style="font-size: 13px; color: var(--tg-hint); line-height: 1.4;">
+                    Do'stlaringizni taklif qiling va har bir do'stingiz uchun <b>80 so'm</b> bonusga ega bo'ling!
+                </p>
+
+                <div class="copy-box">
+                    <input type="text" id="referral-link" class="copy-input" value="https://t.me/TurfaSeenBot?start=user000" readonly>
+                    <button class="copy-btn" onclick="copyReferralLink()">Nusxalash</button>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px;">
+                    <div style="background: rgba(255,255,255,0.04); padding: 12px; border-radius: 12px; text-align: center;">
+                        <div style="font-size: 12px; color: var(--tg-hint);">Taklif qilinganlar</div>
+                        <div style="font-size: 20px; font-weight: 800; color: #38bdf8; margin-top: 4px;" id="referral-count">0 ta</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.04); padding: 12px; border-radius: 12px; text-align: center;">
+                        <div style="font-size: 12px; color: var(--tg-hint);">Topilgan daromad</div>
+                        <div style="font-size: 20px; font-weight: 800; color: #22c55e; margin-top: 4px;" id="referral-earnings">0 so'm</div>
+                    </div>
+                </div>
+
+                <button class="action-btn" onclick="shareReferralLink()" style="margin-top: 16px;">
+                    📢 Telegram orqali ulashish
+                </button>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5. HISOBIM VIEW -->
+        <!-- ============================================================ -->
+        <section id="view-account" class="view-container">
+            <div class="view-header">
+                <h2>💎 Mening hisobim</h2>
+                <button class="back-link-btn" onclick="navigateTo('dashboard')">← Orqaga</button>
+            </div>
+            <div class="card">
+                <div class="list-container">
+                    <div class="list-item">
+                        <div>
+                            <div class="list-item-title">Telegram ID</div>
+                            <div class="list-item-sub" id="acc-user-id">00000000</div>
+                        </div>
+                    </div>
+                    <div class="list-item">
+                        <div>
+                            <div class="list-item-title">Asosiy balans</div>
+                            <div class="list-item-sub" id="acc-balance">0 so'm</div>
+                        </div>
+                    </div>
+                    <div class="list-item">
+                        <div>
+                            <div class="list-item-title">Jami kiritilgan mablag'</div>
+                            <div class="list-item-sub" id="acc-total-deposit">0 so'm</div>
+                        </div>
+                    </div>
+                    <div class="list-item">
+                        <div>
+                            <div class="list-item-title">Hisob holati</div>
+                            <div class="list-item-sub">Standart foydalanuvchi</div>
+                        </div>
+                        <span class="status-badge status-completed">Aktiv</span>
+                    </div>
+                </div>
+
+                <button class="action-btn" onclick="navigateTo('deposit')" style="margin-top: 16px;">
+                    💳 Balansni to'ldirish
+                </button>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 6. PUL KIRITISH VIEW -->
+        <!-- ============================================================ -->
+        <section id="view-deposit" class="view-container">
+            <div class="view-header">
+                <h2>💳 Pul kiritish</h2>
+                <button class="back-link-btn" onclick="navigateTo('dashboard')">← Orqaga</button>
+            </div>
+            <div class="card">
+                <div class="form-group">
+                    <label class="form-label">To'lov tizimini tanlang:</label>
+                    <div class="chips-grid">
+                        <button class="chip-item active" onclick="selectPaymentSystem(this, 'Uzcard/Humo')">💳 Uzcard / Humo</button>
+                        <button class="chip-item" onclick="selectPaymentSystem(this, 'Payme')">🟢 Payme</button>
+                        <button class="chip-item" onclick="selectPaymentSystem(this, 'Click')">🔵 Click</button>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--card-border); padding: 14px; border-radius: 14px; margin-bottom: 14px;">
+                    <div style="font-size: 12px; color: var(--tg-hint);">Karta raqami:</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                        <strong style="font-size: 16px; letter-spacing: 1px;" id="payment-card-num">5614 6846 0592 9718</strong>
+                        <button class="copy-btn" onclick="copyCardNumber()">Nusxa</button>
+                    </div>
+                    <div style="font-size: 12px; color: var(--tg-hint); margin-top: 8px;">Izoh: <b id="payment-comment">8048583227</b></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">To'lov summasi (so'm):</label>
+                    <input type="number" id="deposit-amount-input" class="form-control" placeholder="Masalan: 20000" min="1000">
+                </div>
+
+                <button class="action-btn" onclick="submitDeposit()">
+                    ✅ To'lovni tasdiqlash uchun yuborish
+                </button>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 7. YORDAM VIEW -->
+        <!-- ============================================================ -->
+        <section id="view-help" class="view-container">
+            <div class="view-header">
+                <h2>❓ Yordam va Qo'llab-quvvatlash</h2>
+                <button class="back-link-btn" onclick="navigateTo('dashboard')">← Orqaga</button>
+            </div>
+            <div class="card">
+                <p style="font-size: 14px; line-height: 1.6; color: var(--tg-text); margin-bottom: 16px;">
+                    Turfa Seen boti orqali barcha ommabop ijtimoiy tarmoqlar uchun obunachi, ko'rishlar, layklar va boshqa faolliklarni avtomatik tarzda buyurtma qilishingiz mumkin.
+                </p>
+
+                <div class="list-container">
+                    <div class="list-item" onclick="contactAdmin('help')" style="cursor: pointer;">
+                        <div>
+                            <div class="list-item-title">👤 Bog'lanish (Admin)</div>
+                            <div class="list-item-sub">Savol yoki muammolar bo'yicha</div>
+                        </div>
+                        <span style="font-size: 16px;">💬</span>
+                    </div>
+                    <div class="list-item" onclick="openChannel()" style="cursor: pointer;">
+                        <div>
+                            <div class="list-item-title">📢 Rasmiy kanal</div>
+                            <div class="list-item-sub">Yangiliklar va chegirmalar</div>
+                        </div>
+                        <span style="font-size: 16px;">↗️</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 8. HAMKORLIK DASTURI VIEW -->
+        <!-- ============================================================ -->
+        <section id="view-partner" class="view-container">
+            <div class="view-header">
+                <h2>💻 Hamkorlik dasturi</h2>
+                <button class="back-link-btn" onclick="navigateTo('dashboard')">← Orqaga</button>
+            </div>
+            <div class="card">
+                <div style="font-size: 14px; line-height: 1.6;">
+                    <h3 style="font-size: 16px; margin-bottom: 8px;">🤝 Biz bilan hamkorlik qiling!</h3>
+                    <p style="color: var(--tg-hint); margin-bottom: 12px;">
+                        Katta auditoriyaga ega kanallar, blogerlar va SMM mutaxassislari uchun maxsus shartlar va bonusli takliflar mavjud.
+                    </p>
+                    <ul style="padding-left: 20px; color: var(--tg-text); margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px;">
+                        <li>Maxsus ulgurji narxlar</li>
+                        <li>Individual API integratsiyasi</li>
+                        <li>24/7 tezkor texnik yordam</li>
+                    </ul>
+                </div>
+                <button class="action-btn" onclick="contactAdmin('partner')">
+                    📩 Hamkorlik uchun adminga yozish
+                </button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Application Logic -->
+    <script src="js/app.js"></script>
+</body>
+</html>
