@@ -78,13 +78,15 @@ async def lifespan(app: FastAPI):
             logger.info(f"Setting webhook to {webhook_full_url}")
             await bot.set_webhook(
                 url=webhook_full_url,
-                drop_pending_updates=True,
-                allowed_updates=["message", "callback_query"]
+                drop_pending_updates=False,
+                allowed_updates=dp.resolve_used_update_types()
             )
+            webhook_info = await bot.get_webhook_info()
+            logger.info(f"Telegram Webhook info: {webhook_info}")
         else:
             logger.info("WEBHOOK_URL not provided. Starting in long-polling mode for local development...")
             await bot.delete_webhook(drop_pending_updates=True)
-            polling_task = asyncio.create_task(dp.start_polling(bot, allowed_updates=["message", "callback_query"]))
+            polling_task = asyncio.create_task(dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types()))
     else:
         logger.warning("BOT_TOKEN is not configured or is default mock token.")
 
@@ -126,7 +128,7 @@ if os.path.exists(webapp_dir):
     app.mount("/webapp", StaticFiles(directory=webapp_dir, html=True), name="webapp")
     app.mount("/static", StaticFiles(directory=webapp_dir), name="static")
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health_check():
     return {
         "status": "healthy",
@@ -135,7 +137,7 @@ async def health_check():
         "webapp_url": settings.effective_webapp_url
     }
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def serve_root():
     index_path = os.path.join(webapp_dir, "index.html")
     if os.path.exists(index_path):
@@ -146,15 +148,34 @@ async def serve_root():
         "mode": "webhook" if settings.WEBHOOK_URL else "polling"
     }
 
+@app.get("/webhook-info")
+async def get_tg_webhook_info():
+    """
+    Diagnostic endpoint to check Telegram webhook status.
+    """
+    if settings.BOT_TOKEN and settings.BOT_TOKEN != "MOCK_TOKEN":
+        info = await bot.get_webhook_info()
+        return {
+            "url": info.url,
+            "has_custom_certificate": info.has_custom_certificate,
+            "pending_update_count": info.pending_update_count,
+            "last_error_date": info.last_error_date,
+            "last_error_message": info.last_error_message,
+            "max_connections": info.max_connections,
+            "ip_address": info.ip_address
+        }
+    return {"error": "Bot token not configured"}
+
 @app.post(settings.WEBHOOK_PATH)
 async def telegram_webhook(request: Request):
     try:
         data = await request.json()
+        logger.info(f"Incoming Telegram webhook update: {data.get('update_id')}")
         update = Update.model_validate(data, context={"bot": bot})
         await dp.feed_update(bot=bot, update=update)
         return Response(status_code=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f"Error handling Telegram webhook update: {e}")
+        logger.error(f"Error handling Telegram webhook update: {e}", exc_info=True)
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"error": str(e)})
 
 if __name__ == "__main__":
@@ -163,4 +184,5 @@ if __name__ == "__main__":
         host=settings.HOST,
         port=settings.PORT
     )
+
 
