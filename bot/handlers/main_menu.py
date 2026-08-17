@@ -15,8 +15,9 @@ async def handle_raqam_olish(message: Message):
     )
     await message.answer(text, reply_markup=get_raqam_olish_keyboard())
 
-@main_menu_router.message(F.text.in_(["🔨 Yordam", "❓ Yordam", "Yordam"]))
+@main_menu_router.message(F.text.in_(["? Yordam", "🔨 Yordam", "❓ Yordam", "Yordam"]))
 async def handle_yordam(message: Message):
+
     text = (
         "❓ <b>Yordam va qo'llab-quvvatlash</b>\n\n"
         "Bot yordamida ijtimoiy tarmoqlaringizni tez va sifatli rivojlantirishingiz mumkin.\n\n"

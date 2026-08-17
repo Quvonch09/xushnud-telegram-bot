@@ -19,9 +19,10 @@ def get_main_menu_keyboard() -> ReplyKeyboardMarkup:
             KeyboardButton(text="💳 Pul kiritish")
         ],
         [
-            KeyboardButton(text="🔨 Yordam"),
+            KeyboardButton(text="? Yordam"),
             KeyboardButton(text="💻 Hamkorlik dasturi")
         ]
+
     ]
     return ReplyKeyboardMarkup(
         keyboard=keyboard,
