@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     def effective_webapp_url(self) -> str:
         return self.WEBAPP_URL or self.WEBSITE_URL or "https://turfaseen.netlify.app"
 
+    @property
     def admin_ids(self) -> List[int]:
         if not self.ADMIN_IDS_RAW:
             return []
@@ -54,5 +55,6 @@ class Settings(BaseSettings):
             if item.isdigit():
                 ids.append(int(item))
         return ids
+
 
 settings = Settings()
