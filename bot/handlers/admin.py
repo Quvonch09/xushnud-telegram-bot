@@ -169,15 +169,15 @@ async def callback_approve_payment_prompt(callback: CallbackQuery, state: FSMCon
 
     quick_amounts_kb = InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="5 000 so'm", callback_data=f"adm_set_amt_{payment_id}_{user_id}_5000"),
-            InlineKeyboardButton(text="10 000 so'm", callback_data=f"adm_set_amt_{payment_id}_{user_id}_10000"),
+            InlineKeyboardButton(text="5 000 so'm", callback_data=f"adm_set_amt_{payment_id}_{user_id}_5000", style="primary"),
+            InlineKeyboardButton(text="10 000 so'm", callback_data=f"adm_set_amt_{payment_id}_{user_id}_10000", style="primary"),
         ],
         [
-            InlineKeyboardButton(text="20 000 so'm", callback_data=f"adm_set_amt_{payment_id}_{user_id}_20000"),
-            InlineKeyboardButton(text="50 000 so'm", callback_data=f"adm_set_amt_{payment_id}_{user_id}_50000"),
+            InlineKeyboardButton(text="20 000 so'm", callback_data=f"adm_set_amt_{payment_id}_{user_id}_20000", style="primary"),
+            InlineKeyboardButton(text="50 000 so'm", callback_data=f"adm_set_amt_{payment_id}_{user_id}_50000", style="primary"),
         ],
         [
-            InlineKeyboardButton(text="100 000 so'm", callback_data=f"adm_set_amt_{payment_id}_{user_id}_100000"),
+            InlineKeyboardButton(text="100 000 so'm", callback_data=f"adm_set_amt_{payment_id}_{user_id}_100000", style="primary"),
         ]
     ])
 
