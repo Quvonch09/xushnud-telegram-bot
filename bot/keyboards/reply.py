@@ -3,26 +3,25 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 def get_main_menu_keyboard() -> ReplyKeyboardMarkup:
     """
     Main Menu Reply Keyboard (2 columns, 4 rows)
-    Matches 100% exact layout and icons from screenshots.
+    All buttons styled with style="primary" (bg_primary blue style).
     """
     keyboard = [
         [
-            KeyboardButton(text="🛒 Buyurtma berish"),
-            KeyboardButton(text="📞 Raqam olish")
+            KeyboardButton(text="🛒 Buyurtma berish", style="primary"),
+            KeyboardButton(text="📞 Raqam olish", style="primary")
         ],
         [
-            KeyboardButton(text="🐾 Buyurtmalar"),
-            KeyboardButton(text="🐥 Pul ishlash")
+            KeyboardButton(text="👣 Buyurtmalar", style="primary"),
+            KeyboardButton(text="🧑‍💼 Pul ishlash", style="primary")
         ],
         [
-            KeyboardButton(text="💎 Hisobim"),
-            KeyboardButton(text="💳 Pul kiritish")
+            KeyboardButton(text="💎 Hisobim", style="primary"),
+            KeyboardButton(text="💳 Pul kiritish", style="primary")
         ],
         [
-            KeyboardButton(text="? Yordam"),
-            KeyboardButton(text="💻 Hamkorlik dasturi")
+            KeyboardButton(text="❓ Yordam", style="primary"),
+            KeyboardButton(text="💻 Hamkorlik dasturi", style="primary")
         ]
-
     ]
     return ReplyKeyboardMarkup(
         keyboard=keyboard,
@@ -35,7 +34,7 @@ def get_cancel_keyboard() -> ReplyKeyboardMarkup:
     Cancel / Orqaga reply keyboard during FSM text inputs.
     """
     keyboard = [
-        [KeyboardButton(text="❌ Bekor qilish")]
+        [KeyboardButton(text="❌ Bekor qilish", style="danger")]
     ]
     return ReplyKeyboardMarkup(
         keyboard=keyboard,

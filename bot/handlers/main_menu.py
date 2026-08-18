@@ -35,7 +35,7 @@ async def handle_hamkorlik(message: Message):
         "Do'stlaringizni botimizga taklif qilib, qo'shimcha daromad oling!\n\n"
         f"💵 Har bir taklif qilingan foydalanuvchi uchun: <b>{settings.REFERRAL_REWARD} so'm</b> beriladi.\n"
         "To'plangan mablag'larni botdagi istalgan xizmatlar uchun sarflashingiz mumkin.\n\n"
-        "Taklif havolangizni olish uchun <b>'🐥 Pul ishlash'</b> tugmasini bosing."
+        "Taklif havolangizni olish uchun <b>'🧑‍💼 Pul ishlash'</b> tugmasini bosing."
     )
     await message.answer(text, parse_mode="HTML")
 

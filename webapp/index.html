@@ -11,19 +11,19 @@
            TELEGRAM MINI APP - CUSTOM THEME & 1:1 SCREENSHOT BLUE STYLES
            ========================================================================== */
         :root {
-            /* TELEGRAM EXACT SCREENSHOT COLOR */
-            --btn-telegram-blue: #237dbd;
-            --btn-telegram-hover: #298dce;
-            --btn-telegram-active: #1d6fa8;
+            /* TELEGRAM EXACT BLUE STYLE */
+            --btn-telegram-blue: #287DB7;
+            --btn-telegram-hover: #2e8ecf;
+            --btn-telegram-active: #206798;
 
-            /* 8 TA ASOSIY TUGMA RANGLARI (Customizable) */
+            /* 8 TA ASOSIY TUGMA RANGLARI */
             --color-order: var(--btn-telegram-blue);       /* 🛒 Buyurtma berish */
             --color-phone: var(--btn-telegram-blue);       /* 📞 Raqam olish */
-            --color-orders: var(--btn-telegram-blue);      /* 🐾 Buyurtmalar */
-            --color-money: var(--btn-telegram-blue);       /* 🐤 Pul ishlash */
+            --color-orders: var(--btn-telegram-blue);      /* 👣 Buyurtmalar */
+            --color-money: var(--btn-telegram-blue);       /* 🧑‍💼 Pul ishlash */
             --color-account: var(--btn-telegram-blue);     /* 💎 Hisobim */
             --color-deposit: var(--btn-telegram-blue);     /* 💳 Pul kiritish */
-            --color-help: var(--btn-telegram-blue);        /* ? Yordam */
+            --color-help: var(--btn-telegram-blue);        /* ❓ Yordam */
             --color-partner: var(--btn-telegram-blue);     /* 💻 Hamkorlik dasturi */
 
             /* Telegram Dark Theme Integration */
@@ -216,22 +216,22 @@
         }
 
         .menu-btn {
-            min-height: 56px;
+            min-height: 48px;
             border: none;
-            border-radius: var(--radius-md);
+            border-radius: 12px;
             color: #ffffff;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 10px 12px;
+            padding: 12px 14px;
             cursor: pointer;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
             transition: transform 0.15s ease, filter 0.15s ease;
             text-align: center;
-            background: var(--btn-telegram-blue);
+            background: #287DB7;
         }
 
         .menu-btn .btn-icon {
@@ -528,13 +528,13 @@
 
                 <!-- 3. Buyurtmalar -->
                 <button class="menu-btn" data-action="orders" onclick="handleMenuClick('orders')">
-                    <span class="btn-icon">🐾</span>
+                    <span class="btn-icon">👣</span>
                     <span class="btn-text">Buyurtmalar</span>
                 </button>
 
                 <!-- 4. Pul ishlash -->
                 <button class="menu-btn" data-action="money" onclick="handleMenuClick('money')">
-                    <span class="btn-icon">🐥</span>
+                    <span class="btn-icon">🧑‍💼</span>
                     <span class="btn-text">Pul ishlash</span>
                 </button>
 
@@ -552,7 +552,7 @@
 
                 <!-- 7. Yordam -->
                 <button class="menu-btn" data-action="help" onclick="handleMenuClick('help')">
-                    <span class="btn-icon" style="font-weight:900; font-size:17px;">?</span>
+                    <span class="btn-icon">❓</span>
                     <span class="btn-text">Yordam</span>
                 </button>
 

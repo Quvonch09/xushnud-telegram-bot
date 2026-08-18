@@ -6,7 +6,7 @@ from bot.config import settings
 
 referral_router = Router(name="referral_router")
 
-@referral_router.message(F.text.in_(["🐥 Pul ishlash", "🙋 Pul ishlash", "Pul ishlash"]))
+@referral_router.message(F.text.in_(["🧑‍💼 Pul ishlash", "🧑💼 Pul ishlash", "🐥 Pul ishlash", "🙋 Pul ishlash", "Pul ishlash"]))
 async def handle_pul_ishlash(message: Message):
     user_id = message.from_user.id
     user = await db.get_user(user_id)

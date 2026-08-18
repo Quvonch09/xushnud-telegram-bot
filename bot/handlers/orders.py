@@ -338,7 +338,7 @@ async def callback_cancel_order(callback: CallbackQuery, state: FSMContext):
 
 # --- BUYURTMALAR HISTORY ---
 
-@orders_router.message(F.text.in_(["🐾 Buyurtmalar", "Buyurtmalar"]))
+@orders_router.message(F.text.in_(["👣 Buyurtmalar", "🐾 Buyurtmalar", "Buyurtmalar"]))
 async def handle_orders_history(message: Message):
     user_id = message.from_user.id
     orders = await db.get_user_orders(user_id, limit=10)
