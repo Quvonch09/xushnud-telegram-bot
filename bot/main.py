@@ -73,20 +73,30 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.warning(f"Could not set chat menu button: {e}")
 
-        if not settings.USE_POLLING and settings.WEBHOOK_URL:
-            webhook_full_url = f"{settings.WEBHOOK_URL.rstrip('/')}{settings.WEBHOOK_PATH}"
-            logger.info(f"Setting webhook to {webhook_full_url}")
+        # Check if webhook should be used (Render automatically sets RENDER_EXTERNAL_URL or RENDER=true)
+        webhook_url = settings.effective_webhook_url
+        is_cloud_env = bool("onrender.com" in webhook_url or os.environ.get("RENDER") or not settings.USE_POLLING)
+
+        if webhook_url and is_cloud_env:
+            webhook_full_url = f"{webhook_url.rstrip('/')}{settings.WEBHOOK_PATH}"
+            logger.info(f"Setting Webhook mode (no polling conflict): {webhook_full_url}")
             await bot.set_webhook(
                 url=webhook_full_url,
-                drop_pending_updates=False,
+                drop_pending_updates=True,
                 allowed_updates=dp.resolve_used_update_types()
             )
             webhook_info = await bot.get_webhook_info()
-            logger.info(f"Telegram Webhook info: {webhook_info}")
+            logger.info(f"Telegram Webhook active: {webhook_info.url}")
         else:
-            logger.info("Starting Telegram Bot in long-polling mode (fast and 100% reliable)...")
-            await bot.delete_webhook(drop_pending_updates=False)
-            polling_task = asyncio.create_task(dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types()))
+            logger.info("Starting Telegram Bot in long-polling mode...")
+            await bot.delete_webhook(drop_pending_updates=True)
+            polling_task = asyncio.create_task(
+                dp.start_polling(
+                    bot,
+                    allowed_updates=dp.resolve_used_update_types(),
+                    handle_signals=False
+                )
+            )
     else:
         logger.warning("BOT_TOKEN is not configured or is default mock token.")
 
@@ -102,7 +112,8 @@ async def lifespan(app: FastAPI):
 
     if settings.BOT_TOKEN and settings.BOT_TOKEN != "MOCK_TOKEN":
         try:
-            await bot.delete_webhook()
+            if not settings.effective_webhook_url:
+                await bot.delete_webhook()
         except Exception:
             pass
         await bot.session.close()

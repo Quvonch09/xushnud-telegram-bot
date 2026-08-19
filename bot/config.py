@@ -43,7 +43,12 @@ class Settings(BaseSettings):
 
     @property
     def effective_webapp_url(self) -> str:
-        return self.WEBAPP_URL or self.WEBSITE_URL or "https://turfaseen.netlify.app"
+        render_url = os.environ.get("RENDER_EXTERNAL_URL")
+        return self.WEBAPP_URL or render_url or self.WEBSITE_URL or "https://turfaseen.netlify.app"
+
+    @property
+    def effective_webhook_url(self) -> str:
+        return self.WEBHOOK_URL or os.environ.get("RENDER_EXTERNAL_URL") or os.environ.get("PUBLIC_URL") or ""
 
     @property
     def admin_ids(self) -> List[int]:
