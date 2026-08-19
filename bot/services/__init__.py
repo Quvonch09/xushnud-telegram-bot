@@ -4,9 +4,10 @@ from .order_service import order_service, OrderService
 from .user_service import user_service, UserService
 from .admin_service import admin_service, AdminService
 from .audit_log import audit_service, AuditLogService
+from .smm_provider import smm_provider, SmmProviderClient
 
-# Alias for backwards compatibility if needed
-smm_service = mock_provider
+# Alias for backwards compatibility
+smm_service = smm_provider
 
 __all__ = [
     "mock_provider",
@@ -21,5 +22,7 @@ __all__ = [
     "AdminService",
     "audit_service",
     "AuditLogService",
+    "smm_provider",
+    "SmmProviderClient",
     "smm_service"
 ]

@@ -8,10 +8,16 @@ from bot.services import (
     order_service,
     user_service,
     admin_service,
-    audit_service
+    audit_service,
+    smm_provider
 )
 from bot.keyboards.reply import get_main_menu_keyboard
-from bot.keyboards.inline import get_categories_keyboard, get_order_confirmation_keyboard
+from bot.keyboards.inline import (
+    get_categories_keyboard,
+    get_order_confirmation_keyboard,
+    get_reaction_emojis_keyboard,
+    get_poll_options_keyboard
+)
 
 class TestDemoSimulator(unittest.IsolatedAsyncioTestCase):
 
@@ -38,6 +44,9 @@ class TestDemoSimulator(unittest.IsolatedAsyncioTestCase):
     async def test_02_service_selection(self):
         categories = await db.get_categories_by_platform("Telegram")
         self.assertIn("Obunachi", categories)
+        self.assertIn("Reaksiya", categories)
+        self.assertIn("Ovozlar", categories)
+        self.assertIn("Boost ovoz", categories)
         services = await db.get_services_by_category("Telegram", "Obunachi")
         self.assertGreater(len(services), 0)
         self.assertTrue(services[0].is_demo)
@@ -48,7 +57,6 @@ class TestDemoSimulator(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(valid)
         self.assertIn("https://", err)
 
-        # Also test via OrderService
         res = await order_service.validate_and_create_order(
             user_telegram_id=999888777,
             service_id=1,
@@ -71,13 +79,11 @@ class TestDemoSimulator(unittest.IsolatedAsyncioTestCase):
         order = res["order"]
         self.assertIsNotNone(order.id)
         self.assertTrue(order.is_demo)
-        self.assertTrue(order.external_order_id.startswith("DEMO_ORD_"))
+        self.assertIsNotNone(order.external_order_id)
 
     # 5. Demo payment ikki marta kelganda takroriy balans yechilmaydi (Idempotency)
     async def test_05_idempotent_payment(self):
         user, _ = await user_service.get_or_create_user(telegram_id=333444555)
-        initial_balance = user.balance
-
         key = "idemp_test_tx_001"
         res1 = await demo_payment_provider.process_payment(
             user_telegram_id=333444555,
@@ -97,7 +103,6 @@ class TestDemoSimulator(unittest.IsolatedAsyncioTestCase):
 
     # 6. MockProvider tashqi tarmoqqa so'rov yubormasligi
     async def test_06_mock_provider_offline(self):
-        # Mock provider generates deterministic response with zero network calls
         res = await mock_provider.create_demo_order(
             service_id=1,
             service_name="Test Service",
@@ -129,7 +134,6 @@ class TestDemoSimulator(unittest.IsolatedAsyncioTestCase):
         order = res["order"]
         self.assertEqual(order.status, "demo_processing")
 
-        # Advance to demo_completed
         updated = await order_service.advance_order_status(order.id, "demo_completed")
         self.assertIsNotNone(updated)
         self.assertEqual(updated.status, "demo_completed")
@@ -157,7 +161,6 @@ class TestDemoSimulator(unittest.IsolatedAsyncioTestCase):
     # 10. Mobile UI'da tugmalar ikki ustunda chiroyli chiqadi
     def test_10_keyboard_structure(self):
         main_kb = get_main_menu_keyboard()
-        # Ensure 4 rows of 2 buttons
         self.assertEqual(len(main_kb.keyboard), 4)
         for row in main_kb.keyboard:
             self.assertEqual(len(row), 2)
@@ -181,6 +184,79 @@ class TestDemoSimulator(unittest.IsolatedAsyncioTestCase):
         )
         order = res["order"]
         self.assertTrue(order.is_demo)
+
+    # 13. Reaksiyalar (Reactions) emoji tanlash bilan buyurtma berish
+    async def test_13_reactions_with_emoji(self):
+        user_id = 444333222
+        await user_service.get_or_create_user(telegram_id=user_id)
+        res = await order_service.validate_and_create_order(
+            user_telegram_id=user_id,
+            service_id=7, # Tanlangan emoji reaksiyasi
+            link="https://t.me/demo_channel/123",
+            quantity=50,
+            reaction_type="🔥"
+        )
+        self.assertTrue(res["success"])
+        self.assertEqual(res["order"].reaction_type, "🔥")
+
+        kb = get_reaction_emojis_keyboard(7)
+        self.assertGreater(len(kb.inline_keyboard), 0)
+
+    # 14. Ovozlar (Poll Votes) variant tanlash bilan buyurtma berish
+    async def test_14_poll_votes_with_option(self):
+        user_id = 666777888
+        await user_service.get_or_create_user(telegram_id=user_id)
+        res = await order_service.validate_and_create_order(
+            user_telegram_id=user_id,
+            service_id=29, # So'rovnoma ovozlari
+            link="https://t.me/demo_channel/456",
+            quantity=100,
+            poll_option="2"
+        )
+        self.assertTrue(res["success"])
+        self.assertEqual(res["order"].poll_option, "2")
+
+        kb = get_poll_options_keyboard(29)
+        self.assertGreater(len(kb.inline_keyboard), 0)
+
+    # 15. Ko'rishlar (Views) va Boostlar (Boosts) xizmatlari
+    async def test_15_views_and_boosts_services(self):
+        user_id = 123789456
+        await user_service.get_or_create_user(telegram_id=user_id)
+        # Views
+        res_views = await order_service.validate_and_create_order(
+            user_telegram_id=user_id,
+            service_id=9, # Oxirgi 1 ta post ko'rishlar
+            link="https://t.me/demo_channel/123",
+            quantity=500
+        )
+        self.assertTrue(res_views["success"])
+
+        # Boosts
+        res_boosts = await order_service.validate_and_create_order(
+            user_telegram_id=user_id,
+            service_id=12, # Kanal uchun Boost (1 kunlik)
+            link="https://t.me/demo_channel",
+            quantity=5
+        )
+        self.assertTrue(res_boosts["success"])
+
+    # 16. SMM Provider Client metodlari (add_order, get_order_status, get_balance)
+    async def test_16_smm_provider_client(self):
+        add_res = await smm_provider.add_order(
+            service_id=9,
+            link="https://t.me/demo_channel/10",
+            quantity=100,
+            reaction="❤️",
+            answer_number="1"
+        )
+        self.assertTrue(add_res["success"])
+
+        status_res = await smm_provider.get_order_status("DEMO_TEST_001")
+        self.assertTrue(status_res["success"])
+
+        bal_res = await smm_provider.get_balance()
+        self.assertTrue(bal_res["success"])
 
 
 if __name__ == "__main__":

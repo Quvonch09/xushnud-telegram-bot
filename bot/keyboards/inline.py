@@ -63,7 +63,8 @@ def get_categories_keyboard(platform: str, categories: List[str]) -> InlineKeybo
     🔥 Reaksiya — DEMO
     👁 Ko'rishlar — DEMO
     👤 Obunachi — DEMO
-    🔊 Boost ovoz — DEMO
+    🔊 Boost ovoz / Boostlar — DEMO
+    🗳 Ovozlar — DEMO
     🖼 Hikoya — DEMO
     🇺🇿 O'zbek tarmoq — DEMO
     ⬅️ Orqaga
@@ -73,6 +74,8 @@ def get_categories_keyboard(platform: str, categories: List[str]) -> InlineKeybo
         "Ko'rishlar": "👁",
         "Obunachi": "👤",
         "Boost ovoz": "🔊",
+        "Boostlar": "🚀",
+        "Ovozlar": "🗳",
         "Hikoya": "🖼",
         "O'zbek tarmoq": "🇺🇿",
     }
@@ -117,6 +120,51 @@ def get_service_detail_keyboard(service: ServiceModel) -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="⬅️ Orqaga", callback_data=f"back_to_srv_list_{service.platform}_{service.category}", style="primary")
         ]
     ])
+
+def get_reaction_emojis_keyboard(service_id: int) -> InlineKeyboardMarkup:
+    """
+    Inline keyboard for selecting reaction emoji (👍, ❤️, 🔥, 🎉, 🤩, 👏, ⚡, 🤝)
+    """
+    emojis = ["👍", "❤️", "🔥", "🎉", "🤩", "👏", "⚡", "🤝"]
+    keyboard = []
+    row = []
+    for em in emojis:
+        row.append(InlineKeyboardButton(text=em, callback_data=f"set_react_{service_id}_{em}", style="primary"))
+        if len(row) == 4:
+            keyboard.append(row)
+            row = []
+    if row:
+        keyboard.append(row)
+    keyboard.append([
+        InlineKeyboardButton(text="🎲 Aralash reaksiyalar", callback_data=f"set_react_{service_id}_mixed", style="primary")
+    ])
+    keyboard.append([
+        InlineKeyboardButton(text="⬅️ Orqaga", callback_data="cancel_order", style="primary")
+    ])
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+def get_poll_options_keyboard(service_id: int) -> InlineKeyboardMarkup:
+    """
+    Inline keyboard for selecting poll vote option number (1, 2, 3, 4, 5, 6)
+    """
+    keyboard = [
+        [
+            InlineKeyboardButton(text="1-variant", callback_data=f"set_poll_{service_id}_1", style="primary"),
+            InlineKeyboardButton(text="2-variant", callback_data=f"set_poll_{service_id}_2", style="primary")
+        ],
+        [
+            InlineKeyboardButton(text="3-variant", callback_data=f"set_poll_{service_id}_3", style="primary"),
+            InlineKeyboardButton(text="4-variant", callback_data=f"set_poll_{service_id}_4", style="primary")
+        ],
+        [
+            InlineKeyboardButton(text="5-variant", callback_data=f"set_poll_{service_id}_5", style="primary"),
+            InlineKeyboardButton(text="6-variant", callback_data=f"set_poll_{service_id}_6", style="primary")
+        ],
+        [
+            InlineKeyboardButton(text="⬅️ Orqaga", callback_data="cancel_order", style="primary")
+        ]
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 def get_order_confirmation_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[

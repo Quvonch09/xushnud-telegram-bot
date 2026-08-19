@@ -31,16 +31,18 @@ class ChannelModel(BaseModel):
 class ServiceModel(BaseModel):
     id: int
     platform: str  # Telegram, Instagram, YouTube, TikTok
-    category: str  # Reaksiya, Ko'rishlar, Obunachi, Boost ovoz, Hikoya, O'zbek tarmoq
+    category: str  # Reaksiya, Ko'rishlar, Obunachi, Boost ovoz, Hikoya, O'zbek tarmoq, Ovozlar, Boostlar
     service_id_external: Optional[int] = None
     name: str
     price_per_1000: int
     min_order: int = 10
     max_order: int = 100000
-    description: Optional[str] = "DEMO MODE — Faqat test simulyatsiyasi"
-    estimated_time: str = "1-5 daqiqa (Demo)"
+    description: Optional[str] = "Faqat ommaviy kanal va postlar uchun ishlaydi"
+    estimated_time: str = "1-5 daqiqa"
     is_free: bool = False
     is_demo: bool = True
+    requires_reaction: bool = False
+    requires_poll_option: bool = False
 
 
 class OrderModel(BaseModel):
@@ -51,9 +53,12 @@ class OrderModel(BaseModel):
     link: str
     quantity: int
     price: int
-    status: str = "demo_pending"  # demo_pending, demo_paid, demo_processing, demo_completed, demo_cancelled
+    status: str = "demo_processing"  # demo_pending, demo_paid, demo_processing, demo_completed, demo_cancelled, Pending, InProgress, Completed, Canceled
     estimated_time: Optional[str] = "1-5 daqiqa (Demo)"
-    is_demo: bool = True  # Strictly True for safety
+    reaction_type: Optional[str] = None
+    poll_option: Optional[str] = None
+    extra_params: Optional[Dict[str, Any]] = None
+    is_demo: bool = True
     external_order_id: Optional[str] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
@@ -70,7 +75,7 @@ class PaymentModel(BaseModel):
     comment: Optional[str] = "DEMO_PAYMENT"
     screenshot_file_id: Optional[str] = None
     status: str = "Approved"
-    is_demo: bool = True  # Strictly True for safety
+    is_demo: bool = True
     created_at: Optional[str] = None
 
 

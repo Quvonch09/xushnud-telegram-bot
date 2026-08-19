@@ -2,6 +2,8 @@ from aiogram.fsm.state import State, StatesGroup
 
 class OrderStates(StatesGroup):
     waiting_for_link = State()
+    waiting_for_reaction_emoji = State()
+    waiting_for_poll_option = State()
     waiting_for_quantity = State()
     waiting_for_confirmation = State()
 
