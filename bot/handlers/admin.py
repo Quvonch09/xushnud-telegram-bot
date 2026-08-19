@@ -97,6 +97,25 @@ async def callback_admin_channels(callback: CallbackQuery):
     await callback.message.edit_text("\n".join(lines), parse_mode="HTML", reply_markup=get_admin_main_keyboard())
     await callback.answer()
 
+@admin_router.callback_query(F.data == "adm_audit_logs")
+async def callback_admin_audit_logs(callback: CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("Ruxsat yo'q!", show_alert=True)
+        return
+
+    from bot.services import admin_service
+    logs = await admin_service.get_audit_logs(callback.from_user.id, limit=10)
+    if not logs:
+        text = "📋 <b>Demo Audit Loglar:</b>\n\nHozircha audit yozuvlari mavjud emas."
+    else:
+        lines = ["📋 <b>Oxirgi Demo Audit Loglar:</b>\n"]
+        for log in logs:
+            lines.append(f"• <code>[{log.created_at[:19]}]</code> User: <code>{log.user_id}</code> | Action: <b>{log.action}</b>")
+        text = "\n".join(lines)
+
+    await callback.message.edit_text(text, parse_mode="HTML", reply_markup=get_admin_main_keyboard())
+    await callback.answer()
+
 @admin_router.callback_query(F.data == "adm_add_bal")
 async def callback_admin_add_bal_start(callback: CallbackQuery, state: FSMContext):
     if not is_admin(callback.from_user.id):

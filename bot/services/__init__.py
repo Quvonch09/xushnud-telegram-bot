@@ -1,3 +1,25 @@
-from bot.services.smm_api import smm_service, SmmApiService
+from .mock_provider import mock_provider, MockProvider
+from .demo_payment_provider import demo_payment_provider, DemoPaymentProvider
+from .order_service import order_service, OrderService
+from .user_service import user_service, UserService
+from .admin_service import admin_service, AdminService
+from .audit_log import audit_service, AuditLogService
 
-__all__ = ["smm_service", "SmmApiService"]
+# Alias for backwards compatibility if needed
+smm_service = mock_provider
+
+__all__ = [
+    "mock_provider",
+    "MockProvider",
+    "demo_payment_provider",
+    "DemoPaymentProvider",
+    "order_service",
+    "OrderService",
+    "user_service",
+    "UserService",
+    "admin_service",
+    "AdminService",
+    "audit_service",
+    "AuditLogService",
+    "smm_service"
+]

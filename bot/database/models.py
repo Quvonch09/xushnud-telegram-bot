@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field
 from datetime import datetime
 
@@ -7,12 +7,18 @@ class UserModel(BaseModel):
     telegram_id: int
     username: Optional[str] = None
     first_name: Optional[str] = None
-    balance: int = 0
+    balance: int = 50000  # Default 50 000 demo UZS for instant sandbox testing
     total_deposit: int = 0
     referral_id: Optional[int] = None
     referral_count: int = 0
     is_banned: bool = False
+    is_demo: bool = True
     created_at: Optional[str] = None
+
+    @property
+    def demo_balance(self) -> int:
+        return self.balance
+
 
 class ChannelModel(BaseModel):
     id: int
@@ -21,17 +27,21 @@ class ChannelModel(BaseModel):
     username: Optional[str] = None
     is_active: bool = True
 
+
 class ServiceModel(BaseModel):
     id: int
-    platform: str
-    category: str
+    platform: str  # Telegram, Instagram, YouTube, TikTok
+    category: str  # Reaksiya, Ko'rishlar, Obunachi, Boost ovoz, Hikoya, O'zbek tarmoq
     service_id_external: Optional[int] = None
     name: str
     price_per_1000: int
-    min_order: int
-    max_order: int
-    description: Optional[str] = None
+    min_order: int = 10
+    max_order: int = 100000
+    description: Optional[str] = "DEMO MODE — Faqat test simulyatsiyasi"
+    estimated_time: str = "1-5 daqiqa (Demo)"
     is_free: bool = False
+    is_demo: bool = True
+
 
 class OrderModel(BaseModel):
     id: Optional[int] = None
@@ -41,24 +51,42 @@ class OrderModel(BaseModel):
     link: str
     quantity: int
     price: int
-    status: str = "Pending"
+    status: str = "demo_pending"  # demo_pending, demo_paid, demo_processing, demo_completed, demo_cancelled
+    estimated_time: Optional[str] = "1-5 daqiqa (Demo)"
+    is_demo: bool = True  # Strictly True for safety
     external_order_id: Optional[str] = None
     created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
 
 class PaymentModel(BaseModel):
     id: Optional[int] = None
     user_telegram_id: int
-    system: str
+    order_id: Optional[int] = None
+    system: str = "DEMO_PAY"
+    provider: str = "DemoPaymentProvider"
     amount: Optional[int] = None
-    card_number: Optional[str] = "5614684605929718"
-    comment: Optional[str] = "8048583227"
+    card_number: Optional[str] = "8600 **** **** 1234 (DEMO)"
+    comment: Optional[str] = "DEMO_PAYMENT"
     screenshot_file_id: Optional[str] = None
-    status: str = "Pending"
+    status: str = "Approved"
+    is_demo: bool = True  # Strictly True for safety
     created_at: Optional[str] = None
+
 
 class ReferralModel(BaseModel):
     id: Optional[int] = None
     referrer_id: int
     referred_id: int
     reward: int = 80
+    is_demo: bool = True
+    created_at: Optional[str] = None
+
+
+class AuditLogModel(BaseModel):
+    id: Optional[int] = None
+    user_id: int
+    order_id: Optional[int] = None
+    action: str
+    details: Optional[Dict[str, Any]] = None
     created_at: Optional[str] = None
