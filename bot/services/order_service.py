@@ -111,8 +111,10 @@ class OrderService:
                 "error": f"Provayder xatoligi: {provider_res.get('error', 'Nomaʼlum xatolik')}. Mablag'ingiz hisobingizga qaytarildi."
             }
 
-        ext_id = provider_res.get("order_id", "DEMO_ORD")
-        status = "demo_processing"
+        import uuid
+        ext_id = provider_res.get("order_id") or f"ORD_{uuid.uuid4().hex[:8].upper()}"
+        status = provider_res.get("status", "InProgress")
+        is_demo_flag = provider_res.get("is_demo", False)
 
         # 8. Save Order in Database
         order = await db.create_order(
@@ -126,6 +128,7 @@ class OrderService:
             status=status,
             estimated_time=service.estimated_time or "1-5 daqiqa"
         )
+        order.is_demo = is_demo_flag
         order.reaction_type = reaction_type
         order.poll_option = poll_option
         order.extra_params = extra_params

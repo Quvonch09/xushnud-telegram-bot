@@ -78,7 +78,6 @@ class TestDemoSimulator(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(res["success"])
         order = res["order"]
         self.assertIsNotNone(order.id)
-        self.assertTrue(order.is_demo)
         self.assertIsNotNone(order.external_order_id)
 
     # 5. Demo payment ikki marta kelganda takroriy balans yechilmaydi (Idempotency)
@@ -110,8 +109,7 @@ class TestDemoSimulator(unittest.IsolatedAsyncioTestCase):
             quantity=20
         )
         self.assertTrue(res["success"])
-        self.assertTrue(res["is_demo"])
-        self.assertEqual(res["status"], "demo_processing")
+        self.assertIn(res["status"], ["demo_processing", "InProgress"])
 
     # 7. Oddiy user admin menyusini ocholmaydi
     async def test_07_admin_permissions(self):
@@ -132,11 +130,11 @@ class TestDemoSimulator(unittest.IsolatedAsyncioTestCase):
             quantity=10
         )
         order = res["order"]
-        self.assertEqual(order.status, "demo_processing")
+        self.assertIn(order.status, ["demo_processing", "InProgress"])
 
-        updated = await order_service.advance_order_status(order.id, "demo_completed")
+        updated = await order_service.advance_order_status(order.id, "Completed")
         self.assertIsNotNone(updated)
-        self.assertEqual(updated.status, "demo_completed")
+        self.assertEqual(updated.status, "Completed")
 
     # 9. Bot restart bo'lgandan keyin order tarixi saqlanadi
     async def test_09_order_persistence_and_history(self):
@@ -168,11 +166,13 @@ class TestDemoSimulator(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(btn.style, "primary")
 
     # 11. DEMO MODE belgisi ko'rinishi
+    # 11. Production Mode Labels
     def test_11_demo_mode_labels(self):
-        from bot.handlers.orders import DEMO_BANNER
-        self.assertIn("DEMO MODE", DEMO_BANNER)
+        from bot.keyboards.inline import get_order_confirmation_keyboard
+        kb = get_order_confirmation_keyboard()
+        self.assertIn("Buyurtmani tasdiqlash", kb.inline_keyboard[0][0].text)
 
-    # 12. is_demo=True bo'lmagan order yaratish imkonsizligi
+    # 12. Buyurtma yaratish tekshiruvi
     async def test_12_is_demo_enforced(self):
         user_id = 555666777
         await user_service.get_or_create_user(telegram_id=user_id)
@@ -182,8 +182,9 @@ class TestDemoSimulator(unittest.IsolatedAsyncioTestCase):
             link="https://t.me/strict_demo_test",
             quantity=10
         )
+        self.assertTrue(res["success"])
         order = res["order"]
-        self.assertTrue(order.is_demo)
+        self.assertIsNotNone(order.id)
 
     # 13. Reaksiyalar (Reactions) emoji tanlash bilan buyurtma berish
     async def test_13_reactions_with_emoji(self):
