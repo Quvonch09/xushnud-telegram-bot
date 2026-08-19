@@ -128,6 +128,33 @@ async def callback_back_to_service_list(callback: CallbackQuery):
 
 # --- LEVEL 4: SERVICE DETAIL & INITIATE ORDER ---
 
+@orders_router.callback_query(F.data.startswith("srv_"))
+async def callback_service_detail(callback: CallbackQuery):
+    service_id = int(callback.data.split("_")[1])
+    service = await db.get_service_by_id(service_id)
+    if not service:
+        await callback.answer("Xizmat topilmadi!", show_alert=True)
+        return
+
+    price_str = "0 so'm (Tekin)" if service.is_free else f"{service.price_per_1000:,} so'm".replace(",", " ")
+    text = (
+        f"{DEMO_BANNER}"
+        f"📦 <b>Demo xizmat:</b> {service.name}\n"
+        f"🏷 <b>Platforma:</b> {service.platform} ({service.category})\n"
+        f"💰 <b>Narx (1 000 ta uchun):</b> {price_str}\n"
+        f"📉 <b>Minimal miqdor:</b> {service.min_order:,} ta\n"
+        f"📈 <b>Maksimal miqdor:</b> {service.max_order:,} ta\n"
+        f"⏱ <b>Bajarilish vaqti:</b> {service.estimated_time or '1-5 daqiqa'}\n\n"
+        f"ℹ️ <i>{service.description}</i>"
+    ).replace(",", " ")
+
+    await callback.message.edit_text(
+        text,
+        parse_mode="HTML",
+        reply_markup=get_service_detail_keyboard(service)
+    )
+    await callback.answer()
+
 @orders_router.callback_query(F.data.startswith("order_now_"))
 async def callback_order_now(callback: CallbackQuery, state: FSMContext):
     service_id = int(callback.data.split("_")[2])
