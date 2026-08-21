@@ -14,3 +14,7 @@ class AdminStates(StatesGroup):
     waiting_for_add_balance_user_id = State()
     waiting_for_add_balance_amount = State()
     waiting_for_payment_approve_amount = State()
+    waiting_for_card_number = State()
+    waiting_for_card_comment = State()
+    waiting_for_start_message = State()
+

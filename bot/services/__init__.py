@@ -5,6 +5,7 @@ from .user_service import user_service, UserService
 from .admin_service import admin_service, AdminService
 from .audit_log import audit_service, AuditLogService
 from .smm_provider import smm_provider, SmmProviderClient
+from .settings_service import settings_service, SettingsService
 
 # Alias for backwards compatibility
 smm_service = smm_provider
@@ -24,5 +25,8 @@ __all__ = [
     "AuditLogService",
     "smm_provider",
     "SmmProviderClient",
-    "smm_service"
+    "smm_service",
+    "settings_service",
+    "SettingsService"
 ]
+

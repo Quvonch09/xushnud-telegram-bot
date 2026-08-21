@@ -2,7 +2,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Header, HTTPException, Query, status
 from pydantic import BaseModel
 from bot.database import db, OrderModel, PaymentModel
-from bot.services import order_service, mock_provider, user_service
+from bot.services import order_service, mock_provider, user_service, settings_service
 from bot.utils.telegram_auth import validate_telegram_init_data
 from bot.config import settings
 
@@ -20,6 +20,16 @@ class CreateDepositRequest(BaseModel):
     user_id: int
     amount: int
     payment_system: Optional[str] = "DemoPay"
+
+@api_router.get("/settings")
+async def get_public_settings():
+    return {
+        "card_number": settings_service.get_card_number(),
+        "card_comment": settings_service.get_card_comment(),
+        "support_admin": settings_service.get_support_admin(),
+        "official_channel": settings.OFFICIAL_CHANNEL,
+        "website_url": settings.WEBSITE_URL or settings.WEBAPP_URL
+    }
 
 @api_router.get("/user")
 async def get_user_data(
@@ -157,9 +167,10 @@ async def get_referral(user_id: int = Query(...)):
 @api_router.get("/help")
 async def get_help():
     return {
-        "support_admin": settings.SUPPORT_ADMIN,
+        "support_admin": settings_service.get_support_admin(),
         "official_channel": settings.OFFICIAL_CHANNEL,
         "website_url": settings.WEBSITE_URL or settings.WEBAPP_URL,
         "is_demo": True,
         "notice": "DEMO MODE — Faqat test simulyatsiyasi uchun."
     }
+

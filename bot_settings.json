@@ -1,0 +1,9 @@
+{
+  "payment_card_number": "8600 9999 8888 7777",
+  "payment_comment": "Ali Valiyev",
+  "welcome_message": "Assalomu alaykum, <b>{first_name}</b>!\n\n🚀 <b>Turfa Seen</b> platformasiga xush kelibsiz!\nQuyidagi <b>'🚀 Ilovani ochish'</b> tugmasi orqali qulay va zamonaviy Mini App interfeysidan foydalanishingiz yoki bot menyusidan xizmatlarga buyurtma berishingiz mumkin.",
+  "support_admin": "@quvonchbek_070",
+  "official_channel": "@quvonch_blog",
+  "website_url": "https://turfaseen.netlify.app",
+  "referral_reward": 80
+}

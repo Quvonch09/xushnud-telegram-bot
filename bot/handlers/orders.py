@@ -1,5 +1,6 @@
 import re
 from aiogram import Router, F
+from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from bot.database import db
@@ -20,6 +21,27 @@ from bot.states import OrderStates
 
 orders_router = Router(name="orders_router")
 
+# --- CANCEL ORDER IN ANY STATE ---
+
+@orders_router.message(OrderStates.waiting_for_link, F.text.in_(["❌ Bekor qilish", "/cancel", "Bekor qilish", "❌ Chiqish", "Chiqish"]))
+@orders_router.message(OrderStates.waiting_for_reaction_emoji, F.text.in_(["❌ Bekor qilish", "/cancel", "Bekor qilish", "❌ Chiqish", "Chiqish"]))
+@orders_router.message(OrderStates.waiting_for_poll_option, F.text.in_(["❌ Bekor qilish", "/cancel", "Bekor qilish", "❌ Chiqish", "Chiqish"]))
+@orders_router.message(OrderStates.waiting_for_quantity, F.text.in_(["❌ Bekor qilish", "/cancel", "Bekor qilish", "❌ Chiqish", "Chiqish"]))
+@orders_router.message(OrderStates.waiting_for_confirmation, F.text.in_(["❌ Bekor qilish", "/cancel", "Bekor qilish", "❌ Chiqish", "Chiqish"]))
+async def cancel_order_text_handler(message: Message, state: FSMContext):
+    await state.clear()
+    await message.answer("❌ Buyurtma bekor qilindi.\n\n📩 Asosiy menyudasiz", reply_markup=get_main_menu_keyboard())
+
+@orders_router.callback_query(F.data == "cancel_order")
+async def callback_cancel_order(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
+    try:
+        await callback.message.delete()
+    except Exception:
+        pass
+    await callback.message.answer("❌ Buyurtma bekor qilindi.\n\n📩 Asosiy menyudasiz", reply_markup=get_main_menu_keyboard())
+    await callback.answer("Buyurtma bekor qilindi")
+
 # --- LEVEL 1: PLATFORM SELECTION ---
 
 @orders_router.message(F.text.in_(["🛒 Buyurtma berish", "Buyurtma berish"]))
@@ -35,7 +57,10 @@ async def handle_buyurtma_berish(message: Message, state: FSMContext):
 async def callback_back_to_platforms(callback: CallbackQuery, state: FSMContext):
     await state.clear()
     text = "➤ <b>Ijtimoiy tarmoqni tanlang:</b>"
-    await callback.message.edit_text(text, parse_mode="HTML", reply_markup=get_platforms_keyboard())
+    try:
+        await callback.message.edit_text(text, parse_mode="HTML", reply_markup=get_platforms_keyboard())
+    except Exception:
+        await callback.message.answer(text, parse_mode="HTML", reply_markup=get_platforms_keyboard())
     await callback.answer()
 
 # --- LEVEL 2: CATEGORY SELECTION ---
@@ -48,7 +73,7 @@ async def callback_platform_selected(callback: CallbackQuery):
 
     categories = await db.get_categories_by_platform(platform)
     if not categories:
-        categories = ["Obunachi", "Ko'rishlar", "Reaksiya"]
+        categories = ["Reaksiya", "Ko'rishlar", "Obunachi", "Boost ovoz", "Ovozlar"]
 
     text = f"▶️ <b>Xizmat turini tanlang ({platform}):</b>"
     await callback.message.edit_text(
@@ -119,7 +144,7 @@ async def callback_service_detail(callback: CallbackQuery):
         await callback.answer("Xizmat topilmadi!", show_alert=True)
         return
 
-    price_str = "Tekin" if service.is_free or service.price_per_1000 == 0 else f"{service.price_per_1000:,} so'm".replace(",", " ")
+    price_str = "Tekin 🎁" if service.is_free or service.price_per_1000 == 0 else f"{service.price_per_1000:,} so'm".replace(",", " ")
     text = (
         f"📦 <b>Xizmat:</b> {service.name}\n"
         f"🏷 <b>Platforma:</b> {service.platform} ({service.category})\n"
@@ -162,7 +187,8 @@ async def callback_order_now(callback: CallbackQuery, state: FSMContext):
     link_prompt = (
         f"🔗 <b>Buyurtma uchun havola yuboring:</b>\n\n"
         f"Paket: <b>{service.name}</b>\n"
-        f"Namuna: <code>https://t.me/kanal_nomi</code> yoki <code>@kanal_nomi</code>"
+        f"Namuna: <code>https://t.me/kanal_nomi/123</code> yoki <code>https://t.me/kanal_nomi</code>\n\n"
+        "<i>Bekor qilish uchun '❌ Bekor qilish' tugmasini bosing.</i>"
     )
 
     try:
@@ -186,7 +212,7 @@ async def process_order_link(message: Message, state: FSMContext):
     is_valid, err_msg = mock_provider.validate_url(link, platform)
     if not is_valid:
         await message.answer(
-            f"❌ <b>Xatolik:</b> {err_msg}\n\nIltimos, to'g'ri havola yuboring:",
+            f"❌ <b>Xatolik:</b> {err_msg}\n\nIltimos, to'g'ri havola yuboring yoki bekor qilish uchun '❌ Bekor qilish' ni bosing:",
             parse_mode="HTML",
             reply_markup=get_cancel_keyboard()
         )
@@ -198,8 +224,8 @@ async def process_order_link(message: Message, state: FSMContext):
     if data.get("requires_reaction"):
         await state.set_state(OrderStates.waiting_for_reaction_emoji)
         text = (
-            "❤️ <b>Qo'shilishi kerak bo'lgan reaksiya emojisini tanlang:</b>\n"
-            "Quyidagi tugmalardan birini bosing yoki o'zingiz istagan emojini yuboring:"
+            "❤️ <b>Qo'shilishi kerak bo'lgan reaksiya emojisini tanlang:</b>\n\n"
+            "Quyidagi tugmalardan birini bosing yoki o'zingiz istagan emojini yozib yuboring:"
         )
         await message.answer(text, parse_mode="HTML", reply_markup=get_reaction_emojis_keyboard(service_id))
         return
@@ -223,7 +249,7 @@ async def process_order_link(message: Message, state: FSMContext):
         f"🔢 <b>Buyurtma miqdorini kiriting:</b>\n\n"
         f"Minimal miqdor: <b>{min_ord:,}</b> ta\n"
         f"Maksimal miqdor: <b>{max_ord:,}</b> ta\n\n"
-        f"<i>Faqat butun son yuboring (Masalan: 100).</i>"
+        f"<i>Faqat butun son yuboring (Masalan: {min_ord}).</i>"
     ).replace(",", " ")
 
     await message.answer(text, parse_mode="HTML", reply_markup=get_cancel_keyboard())
@@ -238,8 +264,8 @@ async def callback_set_reaction_emoji(callback: CallbackQuery, state: FSMContext
     await state.set_state(OrderStates.waiting_for_quantity)
 
     data = await state.get_data()
-    min_ord = data.get("min_order", 10)
-    max_ord = data.get("max_order", 100000)
+    min_ord = data.get("min_order", 1)
+    max_ord = data.get("max_order", 50 if data.get("is_free") else 100000)
 
     text = (
         f"Tanlangan reaksiya: <b>{emoji_val}</b>\n\n"
@@ -262,8 +288,8 @@ async def process_custom_reaction_emoji(message: Message, state: FSMContext):
     await state.set_state(OrderStates.waiting_for_quantity)
 
     data = await state.get_data()
-    min_ord = data.get("min_order", 10)
-    max_ord = data.get("max_order", 100000)
+    min_ord = data.get("min_order", 1)
+    max_ord = data.get("max_order", 50 if data.get("is_free") else 100000)
 
     text = (
         f"Tanlangan reaksiya: <b>{emoji_val}</b>\n\n"
@@ -325,14 +351,14 @@ async def process_order_quantity(message: Message, state: FSMContext):
     qty_text = message.text.strip()
     if not qty_text.isdigit():
         await message.answer(
-            "❌ Iltimos, faqat musbat butun son kiriting (Masalan: 500):",
+            "❌ Iltimos, faqat musbat butun son kiriting (Masalan: 50):",
             reply_markup=get_cancel_keyboard()
         )
         return
 
     quantity = int(qty_text)
     data = await state.get_data()
-    min_ord = data.get("min_order", 10)
+    min_ord = data.get("min_order", 1)
     max_ord = data.get("max_order", 100000)
 
     if quantity < min_ord:
@@ -357,7 +383,7 @@ async def process_order_quantity(message: Message, state: FSMContext):
     await state.update_data(quantity=quantity, total_price=total_price)
     await state.set_state(OrderStates.waiting_for_confirmation)
 
-    price_fmt = "Tekin" if total_price == 0 else f"{total_price:,} so'm".replace(",", " ")
+    price_fmt = "Tekin 🎁 (0 so'm)" if total_price == 0 else f"{total_price:,} so'm".replace(",", " ")
     estimated_time = data.get("estimated_time", "1-5 daqiqa")
 
     extra_lines = []
@@ -421,7 +447,7 @@ async def callback_confirm_order(callback: CallbackQuery, state: FSMContext):
         return
 
     order = res["order"]
-    price_fmt = f"{order.price:,} so'm".replace(",", " ")
+    price_fmt = "Tekin 🎁" if order.price == 0 else f"{order.price:,} so'm".replace(",", " ")
 
     extra_details = []
     if reaction_type:
@@ -434,7 +460,7 @@ async def callback_confirm_order(callback: CallbackQuery, state: FSMContext):
         f"✅ <b>Buyurtma muvaffaqiyatli qabul qilindi!</b>\n\n"
         f"🆔 <b>Buyurtma ID:</b> <code>#{order.id}</code>\n"
         f"📦 <b>Xizmat:</b> {order.service_name}\n"
-        f"🔗 <b>Havola:</b> {order.link}"
+        f"🔗 <b>Havola:</b> <code>{order.link}</code>"
         f"{extra_details_str}\n"
         f"🔢 <b>Miqdor:</b> {order.quantity:,} ta\n"
         f"💰 <b>Yechilgan summa:</b> {price_fmt}\n"
@@ -451,26 +477,17 @@ async def callback_confirm_order(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer(success_text, parse_mode="HTML", reply_markup=get_main_menu_keyboard())
     await callback.answer("✅ Buyurtma qabul qilindi!")
 
-@orders_router.callback_query(OrderStates.waiting_for_confirmation, F.data == "cancel_order")
-async def callback_cancel_confirmation(callback: CallbackQuery, state: FSMContext):
-    await state.clear()
-    try:
-        await callback.message.delete()
-    except Exception:
-        pass
-    await callback.message.answer("❌ Buyurtma bekor qilindi.\n\n📩 Asosiy menyudasiz", reply_markup=get_main_menu_keyboard())
-    await callback.answer()
-
 # --- BUYURTMALAR HISTORY ---
 
 @orders_router.message(F.text.in_(["🐾 Buyurtmalar", "👣 Buyurtmalar", "Buyurtmalar"]))
-async def handle_orders_history(message: Message):
+async def handle_orders_history(message: Message, state: FSMContext):
+    await state.clear()
     user_id = message.from_user.id
     orders = await order_service.get_user_orders(user_id, limit=10)
 
     if not orders:
         await message.answer(
-            "Sizda hali buyurtmalar mavjud emas.",
+            "🛍️ Sizda hali buyurtmalar mavjud emas.",
             parse_mode="HTML",
             reply_markup=get_main_menu_keyboard()
         )
@@ -488,10 +505,10 @@ async def handle_orders_history(message: Message):
         "Canceled": "❌ Bekor qilindi"
     }
 
-    lines = ["🐾 <b>Sizning buyurtmalaringiz tarixi:</b>\n"]
+    lines = ["👣 <b>Sizning buyurtmalaringiz tarixi:</b>\n"]
     for o in orders:
         st_text = status_labels.get(o.status, o.status)
-        price_fmt = f"{o.price:,} so'm".replace(",", " ")
+        price_fmt = "Tekin 🎁" if o.price == 0 else f"{o.price:,} so'm".replace(",", " ")
         extra_info = ""
         if getattr(o, "reaction_type", None):
             extra_info += f" | Reaksiya: {o.reaction_type}"

@@ -8,6 +8,7 @@ from bot.keyboards.reply import get_main_menu_keyboard
 from bot.keyboards.inline import get_subscription_keyboard, get_webapp_keyboard
 from bot.middlewares.subscription_check import check_user_subscriptions
 from bot.config import settings
+from bot.services import settings_service
 
 start_router = Router(name="start_router")
 
@@ -15,7 +16,7 @@ start_router = Router(name="start_router")
 async def cmd_start(message: Message, command: CommandObject, bot: Bot):
     user_id = message.from_user.id
     username = message.from_user.username
-    first_name = message.from_user.first_name
+    first_name = message.from_user.first_name or "foydalanuvchi"
 
     # Parse referral parameter (e.g. user15636 or 15636)
     referrer_id = None
@@ -63,12 +64,8 @@ async def cmd_start(message: Message, command: CommandObject, bot: Bot):
             )
             return
 
-    # Show Main Menu & Mini App Button
-    welcome_text = (
-        f"Assalomu alaykum, <b>{first_name or 'foydalanuvchi'}</b>!\n\n"
-        "🚀 <b>Turfa Seen</b> platformasiga xush kelibsiz!\n"
-        "Quyidagi <b>'🚀 Ilovani ochish'</b> tugmasi orqali qulay va zamonaviy Mini App interfeysidan foydalanishingiz mumkin."
-    )
+    # Show Main Menu & Mini App Button with dynamic welcome message
+    welcome_text = settings_service.get_welcome_message(first_name=first_name)
     await message.answer(
         welcome_text,
         parse_mode="HTML",
@@ -96,8 +93,9 @@ async def callback_check_subs(callback: CallbackQuery, bot: Bot):
     except Exception:
         pass
     
+    welcome_text = settings_service.get_welcome_message(first_name=callback.from_user.first_name or "foydalanuvchi")
     await callback.message.answer(
-        "🚀 <b>Turfa Seen Mini App</b>",
+        welcome_text,
         parse_mode="HTML",
         reply_markup=get_webapp_keyboard()
     )
@@ -116,11 +114,13 @@ async def handle_web_app_data(message: Message, bot: Bot):
 
         if action == "deposit":
             amount = data.get("amount", 0)
+            card_num = settings_service.get_card_number()
+            card_comm = settings_service.get_card_comment()
             text = (
                 f"💳 <b>Pul kiritish so'rovi qabul qilindi!</b>\n\n"
                 f"Kiritiladigan summa: <b>{amount:,} so'm</b>\n"
-                f"Karta raqami: <code>{settings.PAYMENT_CARD_NUMBER}</code>\n"
-                f"Izoh (Comment): <code>{settings.PAYMENT_COMMENT}</code>\n\n"
+                f"Karta raqami: <code>{card_num}</code>\n"
+                f"Izoh (Comment): <code>{card_comm}</code>\n\n"
                 "Iltimos, to'lovni amalga oshirgach, chek rasmini botga yuboring."
             ).replace(",", " ")
             await message.answer(text, parse_mode="HTML")
@@ -133,9 +133,10 @@ async def handle_web_app_data(message: Message, bot: Bot):
             bal = f"{user.balance:,} so'm".replace(",", " ") if user else "0 so'm"
             await message.answer(f"💎 Hisobingiz balansi: <b>{bal}</b>", parse_mode="HTML")
         elif action == "help":
-            await message.answer(f"❓ Savollar bo'yicha adminga murojaat qiling: {settings.SUPPORT_ADMIN}")
+            await message.answer(f"❓ Savollar bo'yicha adminga murojaat qiling: {settings_service.get_support_admin()}")
         else:
             logger.info(f"Received web_app_data action: {action}")
     except Exception as e:
         logger.error(f"Error processing web_app_data: {e}")
+
 

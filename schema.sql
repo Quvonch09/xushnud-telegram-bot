@@ -114,6 +114,13 @@ CREATE TABLE IF NOT EXISTS referrals (
 
 CREATE INDEX IF NOT EXISTS idx_referrals_referrer_id ON referrals(referrer_id);
 
+-- 8. BOT SETTINGS TABLE
+CREATE TABLE IF NOT EXISTS bot_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ============================================================
 -- SEED DATA (Demo Simulation)
 -- ============================================================
@@ -124,6 +131,7 @@ INSERT INTO channels (name, link, username, is_active) VALUES
 ON CONFLICT DO NOTHING;
 
 INSERT INTO services (platform, category, service_id_external, name, price_per_1000, min_order, max_order, description, estimated_time, is_free, is_demo) VALUES
+('Telegram', 'Reaksiya', 200, '🎁 Tekin Reaksiya (50 tagacha)', 0, 1, 50, 'Telegram postlari uchun 50 tagacha mutlaqo bepul reaksiya! Istalgan emojini tanlang.', '1-3 daqiqa', TRUE, TRUE),
 ('Telegram', 'Obunachi', 340, 'Tekin Obunachi (Demo)', 0, 1, 40, 'DEMO MODE — Faqat test simulyatsiyasi', '1-5 daqiqa (Demo)', TRUE, TRUE),
 ('Telegram', 'Obunachi', 101, '30 Kun kafolat (Demo)', 8900, 50, 50000, 'DEMO MODE — Faqat test simulyatsiyasi', '1-5 daqiqa (Demo)', FALSE, TRUE),
 ('Telegram', 'Reaksiya', 201, 'Aralash reaksiyalar (👍❤️🔥) (Demo)', 1200, 10, 100000, 'DEMO MODE — Faqat test simulyatsiyasi', '1-5 daqiqa (Demo)', FALSE, TRUE),
@@ -138,3 +146,4 @@ INSERT INTO services (platform, category, service_id_external, name, price_per_1
 ('TikTok', 'Obunachi', 901, 'TikTok Obunachi (Demo)', 18000, 50, 50000, 'DEMO MODE — Faqat test simulyatsiyasi', '1-5 daqiqa (Demo)', FALSE, TRUE),
 ('TikTok', 'Ko''rishlar', 902, 'TikTok Video Ko''rishlar (Demo)', 250, 100, 1000000, 'DEMO MODE — Faqat test simulyatsiyasi', '1-5 daqiqa (Demo)', FALSE, TRUE)
 ON CONFLICT DO NOTHING;
+

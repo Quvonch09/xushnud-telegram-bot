@@ -26,18 +26,21 @@ def get_subscription_keyboard(channels: List[ChannelModel]) -> InlineKeyboardMar
     keyboard = []
     for ch in channels:
         keyboard.append([
-            InlineKeyboardButton(text=ch.name, url=ch.link, style="primary")
+            InlineKeyboardButton(text=f"📢 {ch.name}", url=ch.link, style="primary")
         ])
     keyboard.append([
         InlineKeyboardButton(text="☑️ Tekshirish", callback_data="check_subs", style="primary")
     ])
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
+
 def get_raqam_olish_keyboard() -> InlineKeyboardMarkup:
     admin_link = f"https://t.me/{settings.SUPPORT_ADMIN.lstrip('@')}"
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Admin orqali olish", url=admin_link, style="primary")]
+        [InlineKeyboardButton(text="👤 Admin orqali olish", url=admin_link, style="primary")],
+        [InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_main", style="primary")]
     ])
+
 
 def get_platforms_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -53,9 +56,10 @@ def get_platforms_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="📝 Barcha xizmatlar ↗️", callback_data="platform_all", style="primary"),
         ],
         [
-            InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_main", style="primary"),
+            InlineKeyboardButton(text="⬅️ Asosiy menyu", callback_data="back_to_main", style="primary"),
         ]
     ])
+
 
 def get_categories_keyboard(platform: str, categories: List[str]) -> InlineKeyboardMarkup:
     """
@@ -65,7 +69,7 @@ def get_categories_keyboard(platform: str, categories: List[str]) -> InlineKeybo
         "Reaksiya": "🔥",
         "Ko'rishlar": "👁",
         "Obunachi": "👤",
-        "Boost ovoz": "🔊",
+        "Boost ovoz": "🚀",
         "Boostlar": "🚀",
         "Ovozlar": "🗳",
         "Hikoya": "🖼",
@@ -85,22 +89,26 @@ def get_categories_keyboard(platform: str, categories: List[str]) -> InlineKeybo
         keyboard.append(row)
 
     keyboard.append([
-        InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_platforms", style="primary")
+        InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_platforms", style="primary"),
+        InlineKeyboardButton(text="❌ Chiqish", callback_data="back_to_main", style="primary")
     ])
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
 
 def get_services_keyboard(platform: str, category: str, services: List[ServiceModel]) -> InlineKeyboardMarkup:
     keyboard = []
     for s in services:
-        price_txt = "Tekin" if s.is_free or s.price_per_1000 == 0 else f"{s.price_per_1000:,} so'm".replace(",", " ")
+        price_txt = "Tekin 🎁" if s.is_free or s.price_per_1000 == 0 else f"{s.price_per_1000:,} so'm".replace(",", " ")
         btn_text = f"{s.name} — {price_txt}"
         keyboard.append([
             InlineKeyboardButton(text=btn_text, callback_data=f"srv_{s.id}", style="primary")
         ])
     keyboard.append([
-        InlineKeyboardButton(text="⬅️ Orqaga", callback_data=f"back_to_cats_{platform}", style="primary")
+        InlineKeyboardButton(text="⬅️ Orqaga", callback_data=f"back_to_cats_{platform}", style="primary"),
+        InlineKeyboardButton(text="❌ Chiqish", callback_data="back_to_main", style="primary")
     ])
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
 
 def get_service_detail_keyboard(service: ServiceModel) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -108,12 +116,14 @@ def get_service_detail_keyboard(service: ServiceModel) -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="☑️ Buyurtma berish", callback_data=f"order_now_{service.id}", style="primary")
         ],
         [
-            InlineKeyboardButton(text="⬅️ Orqaga", callback_data=f"back_to_srv_list_{service.platform}_{service.category}", style="primary")
+            InlineKeyboardButton(text="⬅️ Orqaga", callback_data=f"back_to_srv_list_{service.platform}_{service.category}", style="primary"),
+            InlineKeyboardButton(text="❌ Chiqish", callback_data="back_to_main", style="primary")
         ]
     ])
 
+
 def get_reaction_emojis_keyboard(service_id: int) -> InlineKeyboardMarkup:
-    emojis = ["👍", "❤️", "🔥", "🎉", "🤩", "👏", "⚡", "🤝"]
+    emojis = ["👍", "❤️", "🔥", "🎉", "🤩", "👏", "⚡", "🤝", "💯", "🥰", "🚀", "👌"]
     keyboard = []
     row = []
     for em in emojis:
@@ -127,9 +137,10 @@ def get_reaction_emojis_keyboard(service_id: int) -> InlineKeyboardMarkup:
         InlineKeyboardButton(text="🎲 Aralash reaksiyalar", callback_data=f"set_react_{service_id}_mixed", style="primary")
     ])
     keyboard.append([
-        InlineKeyboardButton(text="⬅️ Orqaga", callback_data="cancel_order", style="primary")
+        InlineKeyboardButton(text="⬅️ Bekor qilish", callback_data="cancel_order", style="primary")
     ])
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
 
 def get_poll_options_keyboard(service_id: int) -> InlineKeyboardMarkup:
     keyboard = [
@@ -146,10 +157,11 @@ def get_poll_options_keyboard(service_id: int) -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="6-variant", callback_data=f"set_poll_{service_id}_6", style="primary")
         ],
         [
-            InlineKeyboardButton(text="⬅️ Orqaga", callback_data="cancel_order", style="primary")
+            InlineKeyboardButton(text="⬅️ Bekor qilish", callback_data="cancel_order", style="primary")
         ]
     ]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
 
 def get_order_confirmation_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -157,9 +169,10 @@ def get_order_confirmation_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="✅ Buyurtmani tasdiqlash", callback_data="confirm_order", style="primary")
         ],
         [
-            InlineKeyboardButton(text="⬅️ Bekor qilish", callback_data="cancel_order", style="primary")
+            InlineKeyboardButton(text="❌ Bekor qilish", callback_data="cancel_order", style="primary")
         ]
     ])
+
 
 def get_referral_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -168,30 +181,39 @@ def get_referral_keyboard() -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(text="🌐 Saytimiz", url=settings.WEBSITE_URL, style="primary")
+        ],
+        [
+            InlineKeyboardButton(text="⬅️ Asosiy menyu", callback_data="back_to_main", style="primary")
         ]
     ])
+
 
 def get_hisobim_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="💳 Balansni to'ldirish", callback_data="deposit_money", style="primary")
+        ],
+        [
+            InlineKeyboardButton(text="⬅️ Asosiy menyu", callback_data="back_to_main", style="primary")
         ]
     ])
+
 
 def get_payment_systems_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="CLICK", callback_data="pay_CLICK", style="primary"),
-            InlineKeyboardButton(text="PAYME", callback_data="pay_PAYME", style="primary")
+            InlineKeyboardButton(text="💳 CLICK", callback_data="pay_CLICK", style="primary"),
+            InlineKeyboardButton(text="💳 PAYME", callback_data="pay_PAYME", style="primary")
         ],
         [
-            InlineKeyboardButton(text="UZUM", callback_data="pay_UZUM", style="primary"),
-            InlineKeyboardButton(text="PAYNET", callback_data="pay_PAYNET", style="primary")
+            InlineKeyboardButton(text="💳 UZUM", callback_data="pay_UZUM", style="primary"),
+            InlineKeyboardButton(text="💳 PAYNET", callback_data="pay_PAYNET", style="primary")
         ],
         [
-            InlineKeyboardButton(text="⬅️ Orqaga", callback_data="back_to_main", style="primary")
+            InlineKeyboardButton(text="⬅️ Asosiy menyu", callback_data="back_to_main", style="primary")
         ]
     ])
+
 
 def get_payment_detail_keyboard(system: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -199,9 +221,11 @@ def get_payment_detail_keyboard(system: str) -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="✅ To'lov qildim (Chek yuborish)", callback_data=f"paid_{system}", style="primary")
         ],
         [
-            InlineKeyboardButton(text="⬅️ Orqaga", callback_data="deposit_money", style="primary")
+            InlineKeyboardButton(text="⬅️ Orqaga", callback_data="deposit_money", style="primary"),
+            InlineKeyboardButton(text="❌ Chiqish", callback_data="back_to_main", style="primary")
         ]
     ])
+
 
 def get_admin_payment_keyboard(payment_id: int, user_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -213,16 +237,51 @@ def get_admin_payment_keyboard(payment_id: int, user_id: int) -> InlineKeyboardM
         ]
     ])
 
+
 def get_admin_main_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="💳 Karta sozlamalari", callback_data="adm_card_menu", style="primary"),
+            InlineKeyboardButton(text="✉️ Start xabari", callback_data="adm_start_menu", style="primary")
+        ],
         [
             InlineKeyboardButton(text="💰 Balans qo'shish", callback_data="adm_add_bal", style="primary"),
             InlineKeyboardButton(text="📊 Statistika", callback_data="adm_stats", style="primary")
         ],
         [
+            InlineKeyboardButton(text="📢 Kanallar ro'yxati", callback_data="adm_channels", style="primary"),
             InlineKeyboardButton(text="📋 Audit jurnali", callback_data="adm_audit_logs", style="primary")
         ],
         [
-            InlineKeyboardButton(text="📢 Kanallar ro'yxati", callback_data="adm_channels", style="primary")
+            InlineKeyboardButton(text="🚪 Chiqish", callback_data="adm_exit", style="primary")
+        ]
+    ])
+
+
+def get_admin_card_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="✍️ Karta raqamini o'zgartirish", callback_data="adm_edit_card_num", style="primary")
+        ],
+        [
+            InlineKeyboardButton(text="✍️ Izoh / Karta egasini o'zgartirish", callback_data="adm_edit_card_comment", style="primary")
+        ],
+        [
+            InlineKeyboardButton(text="⬅️ Orqaga", callback_data="adm_back_to_main", style="primary")
+        ]
+    ])
+
+
+def get_admin_start_msg_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="✍️ Yangi matn yozish", callback_data="adm_edit_start_text", style="primary")
+        ],
+        [
+            InlineKeyboardButton(text="👁 Xabarni ko'rish (Preview)", callback_data="adm_preview_start_text", style="primary"),
+            InlineKeyboardButton(text="🔄 Asliga qaytarish", callback_data="adm_reset_start_text", style="primary")
+        ],
+        [
+            InlineKeyboardButton(text="⬅️ Orqaga", callback_data="adm_back_to_main", style="primary")
         ]
     ])

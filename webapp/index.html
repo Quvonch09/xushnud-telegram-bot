@@ -603,10 +603,11 @@
                 <div class="form-group">
                     <label class="form-label">Xizmat turini tanlang:</label>
                     <select id="service-category-select" class="form-control" onchange="updateServiceOptions()">
+                        <option value="Tekin Reaksiya">🎁 Tekin Reaksiya (50 tagacha)</option>
                         <option value="Obunachi">👤 Obunachi / Followers</option>
                         <option value="Ko'rishlar">👁️ Ko'rishlar / Views</option>
                         <option value="Reaksiya">🔥 Reaksiya / Reactions</option>
-                        <option value="Boost ovoz">🔊 Boost ovoz</option>
+                        <option value="Boost ovoz">🚀 Boost ovoz</option>
                     </select>
                 </div>
 
@@ -914,7 +915,7 @@
         };
 
         const servicePrices = {
-            "Telegram": { "Obunachi": 15000, "Ko'rishlar": 800, "Reaksiya": 1200, "Boost ovoz": 45000 },
+            "Telegram": { "Tekin Reaksiya": 0, "Obunachi": 15000, "Ko'rishlar": 800, "Reaksiya": 1200, "Boost ovoz": 45000 },
             "Instagram": { "Obunachi": 22000, "Ko'rishlar": 1000, "Reaksiya": 8000, "Boost ovoz": 20000 },
             "YouTube": { "Obunachi": 75000, "Ko'rishlar": 18000, "Reaksiya": 15000, "Boost ovoz": 30000 },
             "TikTok": { "Obunachi": 35000, "Ko'rishlar": 1500, "Reaksiya": 12000, "Boost ovoz": 25000 }
@@ -997,9 +998,10 @@
             const qtyInput = document.getElementById("order-quantity-input");
             const totalEl = document.getElementById("order-total-price");
             const qty = parseInt(qtyInput?.value || "0", 10);
-            const pricePer1000 = servicePrices[state.selectedPlatform]?.[state.selectedCategory] || 15000;
-            const total = Math.round((qty * pricePer1000) / 1000);
-            if (totalEl) totalEl.textContent = `${formatNumber(total)} so'm`;
+            const isFree = state.selectedCategory === "Tekin Reaksiya";
+            const pricePer1000 = isFree ? 0 : (servicePrices[state.selectedPlatform]?.[state.selectedCategory] || 15000);
+            const total = isFree ? 0 : Math.round((qty * pricePer1000) / 1000);
+            if (totalEl) totalEl.textContent = isFree ? "0 so'm (Tekin 🎁)" : `${formatNumber(total)} so'm`;
             return total;
         }
 
@@ -1008,6 +1010,7 @@
             const qtyInput = document.getElementById("order-quantity-input");
             const link = linkInput?.value.trim();
             const qty = parseInt(qtyInput?.value || "0", 10);
+            const isFree = state.selectedCategory === "Tekin Reaksiya";
             const totalCost = calculateOrderPrice();
 
             if (!link) {
@@ -1015,12 +1018,20 @@
                 showToast("⚠️ Iltimos, havola kiriting!");
                 return;
             }
-            if (qty < 10) {
-                haptic("error");
-                showToast("⚠️ Minimal miqdor: 10 ta");
-                return;
+            if (isFree) {
+                if (qty < 1 || qty > 50) {
+                    haptic("error");
+                    showToast("⚠️ Bepul reaksiya miqdori: 1 dan 50 tagacha!");
+                    return;
+                }
+            } else {
+                if (qty < 10) {
+                    haptic("error");
+                    showToast("⚠️ Minimal miqdor: 10 ta");
+                    return;
+                }
             }
-            if (state.user.balance < totalCost) {
+            if (state.user.balance < totalCost && !isFree) {
                 haptic("warning");
                 showToast("❌ Hisobingizda mablag' yetarli emas!");
                 setTimeout(() => navigateTo("deposit"), 1200);
@@ -1028,7 +1039,7 @@
             }
 
             haptic("success");
-            showToast("🎉 Buyurtma qabul qilindi!");
+            showToast("🎉 Buyurtma muvaffaqiyatli qabul qilindi!");
             if (linkInput) linkInput.value = "";
             setTimeout(() => navigateTo("orders"), 1500);
         }
