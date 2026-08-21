@@ -16,8 +16,9 @@ from bot.keyboards.inline import (
     get_order_confirmation_keyboard,
     get_payment_systems_keyboard
 )
-from bot.services import order_service, mock_provider
+from bot.services import order_service, mock_provider, sync_user_orders
 from bot.states import OrderStates
+
 
 orders_router = Router(name="orders_router")
 
@@ -483,7 +484,15 @@ async def callback_confirm_order(callback: CallbackQuery, state: FSMContext):
 async def handle_orders_history(message: Message, state: FSMContext):
     await state.clear()
     user_id = message.from_user.id
+    
+    # Sync pending orders with provider or auto-completion
+    try:
+        await sync_user_orders(user_id, bot=message.bot)
+    except Exception as e:
+        pass
+
     orders = await order_service.get_user_orders(user_id, limit=10)
+
 
     if not orders:
         await message.answer(

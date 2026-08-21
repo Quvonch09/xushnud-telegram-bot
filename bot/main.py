@@ -24,6 +24,7 @@ from bot.handlers import (
 )
 from bot.api import api_router
 from bot.middlewares import ThrottlingMiddleware, SubscriptionMiddleware
+from bot.services import start_order_status_worker
 
 # Setup proxy for PythonAnywhere free tier or custom proxy if configured
 proxy_url = settings.PROXY_URL or os.environ.get("http_proxy") or os.environ.get("https_proxy")
@@ -51,13 +52,17 @@ dp.include_router(referral_router)
 dp.include_router(main_menu_router)
 
 polling_task = None
+worker_task = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global polling_task
+    global polling_task, worker_task
     logger.info("Starting up Telegram Bot & Mini App Server...")
 
     if settings.BOT_TOKEN and settings.BOT_TOKEN != "MOCK_TOKEN":
+        # Start background Order Status Sync Worker
+        worker_task = asyncio.create_task(start_order_status_worker(bot))
+
         # Configure Telegram Menu Button for Mini App
         try:
             from aiogram.types import MenuButtonWebApp, WebAppInfo
@@ -103,12 +108,20 @@ async def lifespan(app: FastAPI):
     yield
 
     logger.info("Shutting down Telegram Bot Application...")
+    if worker_task:
+        worker_task.cancel()
+        try:
+            await worker_task
+        except asyncio.CancelledError:
+            pass
+
     if polling_task:
         polling_task.cancel()
         try:
             await polling_task
         except asyncio.CancelledError:
             pass
+
 
     if settings.BOT_TOKEN and settings.BOT_TOKEN != "MOCK_TOKEN":
         try:

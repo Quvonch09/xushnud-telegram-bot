@@ -6,13 +6,15 @@ from loguru import logger
 from bot.database import db
 from bot.config import settings
 from bot.states import AdminStates
-from bot.services import settings_service, admin_service
+from bot.services import settings_service, admin_service, smm_provider
 from bot.keyboards.reply import get_main_menu_keyboard, get_cancel_keyboard
 from bot.keyboards.inline import (
     get_admin_main_keyboard,
     get_admin_card_keyboard,
-    get_admin_start_msg_keyboard
+    get_admin_start_msg_keyboard,
+    get_admin_smm_keyboard
 )
+
 
 admin_router = Router(name="admin_router")
 
@@ -548,3 +550,144 @@ async def callback_reject_payment(callback: CallbackQuery, bot: Bot):
     except Exception as e:
         logger.warning(f"Could not notify user {user_id}: {e}")
     await callback.answer()
+
+# --- SMM API SETTINGS MENU ---
+
+@admin_router.callback_query(F.data == "adm_smm_menu")
+async def callback_admin_smm_menu(callback: CallbackQuery, state: FSMContext):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("Ruxsat yo'q!", show_alert=True)
+        return
+
+    await state.clear()
+    smm_url = settings_service.get_smm_api_url() or "Kiritilmagan"
+    smm_key = settings_service.get_smm_api_key()
+    key_masked = f"{smm_key[:6]}...{smm_key[-4:]}" if len(smm_key) > 10 else (smm_key or "Kiritilmagan")
+    is_live = "✅ Faol (Jonli SMM provayder)" if settings_service.is_real_smm_configured() else "⚠️ Simulyatsiya / Test rejimida"
+
+    text = (
+        "⚙️ <b>SMM Panel API Sozlamalari</b>\n\n"
+        f"🌐 <b>API URL:</b> <code>{smm_url}</code>\n"
+        f"🔑 <b>API Key:</b> <code>{key_masked}</code>\n"
+        f"📡 <b>Holat:</b> {is_live}\n\n"
+        "<i>Real nakrutka ishlashi uchun istalgan SMM Panel (v2 API) URL va API Keyini shu yerdan kiritishingiz mumkin.</i>"
+    )
+
+    await callback.message.edit_text(text, parse_mode="HTML", reply_markup=get_admin_smm_keyboard())
+    await callback.answer()
+
+@admin_router.callback_query(F.data == "adm_edit_smm_url")
+async def callback_edit_smm_url(callback: CallbackQuery, state: FSMContext):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("Ruxsat yo'q!", show_alert=True)
+        return
+
+    await state.set_state(AdminStates.waiting_for_smm_api_url)
+    text = (
+        "✍️ <b>Yangi SMM API URL manzilini yuboring:</b>\n\n"
+        "Namuna: <code>https://justanotherpanel.com/api/v2</code> yoki <code>https://smm-provider.uz/api/v2</code>\n\n"
+        f"Hozirgi: <code>{settings_service.get_smm_api_url() or 'Kiritilmagan'}</code>\n\n"
+        "<i>Bekor qilish uchun '❌ Bekor qilish' tugmasini bosing.</i>"
+    )
+    try:
+        await callback.message.delete()
+    except Exception:
+        pass
+    await callback.message.answer(text, parse_mode="HTML", reply_markup=get_cancel_keyboard())
+    await callback.answer()
+
+@admin_router.message(AdminStates.waiting_for_smm_api_url)
+async def process_new_smm_url(message: Message, state: FSMContext):
+    if not is_admin(message.from_user.id):
+        return
+
+    new_url = message.text.strip()
+    if not new_url.startswith("http"):
+        await message.answer("⚠️ Iltimos, to'g'ri URL kiriting (https:// bilan boshlanishi kerak):", reply_markup=get_cancel_keyboard())
+        return
+
+    settings_service.set_smm_api_url(new_url)
+    await state.clear()
+
+    await message.answer(
+        f"✅ <b>SMM API URL muvaffaqiyatli saqlandi!</b>\n\nYangi URL: <code>{new_url}</code>",
+        parse_mode="HTML",
+        reply_markup=get_main_menu_keyboard()
+    )
+    # Re-show SMM menu
+    smm_key = settings_service.get_smm_api_key()
+    key_masked = f"{smm_key[:6]}...{smm_key[-4:]}" if len(smm_key) > 10 else (smm_key or "Kiritilmagan")
+    is_live = "✅ Faol (Jonli SMM provayder)" if settings_service.is_real_smm_configured() else "⚠️ Simulyatsiya / Test rejimida"
+
+    text = (
+        "⚙️ <b>SMM Panel API Sozlamalari</b>\n\n"
+        f"🌐 <b>API URL:</b> <code>{new_url}</code>\n"
+        f"🔑 <b>API Key:</b> <code>{key_masked}</code>\n"
+        f"📡 <b>Holat:</b> {is_live}"
+    )
+    await message.answer(text, parse_mode="HTML", reply_markup=get_admin_smm_keyboard())
+
+@admin_router.callback_query(F.data == "adm_edit_smm_key")
+async def callback_edit_smm_key(callback: CallbackQuery, state: FSMContext):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("Ruxsat yo'q!", show_alert=True)
+        return
+
+    await state.set_state(AdminStates.waiting_for_smm_api_key)
+    text = (
+        "✍️ <b>SMM Panel API Kalitini (API Key) yuboring:</b>\n\n"
+        "Namuna: <code>a1b2c3d4e5f6...</code>\n\n"
+        "<i>Bekor qilish uchun '❌ Bekor qilish' tugmasini bosing.</i>"
+    )
+    try:
+        await callback.message.delete()
+    except Exception:
+        pass
+    await callback.message.answer(text, parse_mode="HTML", reply_markup=get_cancel_keyboard())
+    await callback.answer()
+
+@admin_router.message(AdminStates.waiting_for_smm_api_key)
+async def process_new_smm_key(message: Message, state: FSMContext):
+    if not is_admin(message.from_user.id):
+        return
+
+    new_key = message.text.strip()
+    settings_service.set_smm_api_key(new_key)
+    await state.clear()
+
+    await message.answer(
+        "✅ <b>SMM API Key muvaffaqiyatli saqlandi!</b>",
+        parse_mode="HTML",
+        reply_markup=get_main_menu_keyboard()
+    )
+
+    smm_url = settings_service.get_smm_api_url() or "Kiritilmagan"
+    key_masked = f"{new_key[:6]}...{new_key[-4:]}" if len(new_key) > 10 else new_key
+    is_live = "✅ Faol (Jonli SMM provayder)" if settings_service.is_real_smm_configured() else "⚠️ Simulyatsiya / Test rejimida"
+
+    text = (
+        "⚙️ <b>SMM Panel API Sozlamalari</b>\n\n"
+        f"🌐 <b>API URL:</b> <code>{smm_url}</code>\n"
+        f"🔑 <b>API Key:</b> <code>{key_masked}</code>\n"
+        f"📡 <b>Holat:</b> {is_live}"
+    )
+    await message.answer(text, parse_mode="HTML", reply_markup=get_admin_smm_keyboard())
+
+@admin_router.callback_query(F.data == "adm_check_smm_bal")
+async def callback_check_smm_balance(callback: CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("Ruxsat yo'q!", show_alert=True)
+        return
+
+    bal_res = await smm_provider.get_balance()
+    if bal_res.get("success"):
+        bal = bal_res.get("balance", "0")
+        curr = bal_res.get("currency", "USD")
+        is_mock = " (Simulyatsiya)" if bal_res.get("is_mock") else " (Jonli API)"
+        text = f"💰 <b>SMM Provayder Balansi:</b> <b>{bal} {curr}</b>{is_mock}"
+    else:
+        text = f"❌ <b>Xatolik:</b> {bal_res.get('error', 'Provayderga ulanib bo‘lmadi')}"
+
+    await callback.message.reply(text, parse_mode="HTML")
+    await callback.answer()
+

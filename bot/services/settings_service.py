@@ -21,7 +21,9 @@ class SettingsService:
             "support_admin": settings.SUPPORT_ADMIN or "@inqiIob",
             "official_channel": settings.OFFICIAL_CHANNEL or "@TurfaSeen",
             "website_url": settings.WEBSITE_URL or "https://turfaseen.netlify.app",
-            "referral_reward": settings.REFERRAL_REWARD or 80
+            "referral_reward": settings.REFERRAL_REWARD or 80,
+            "smm_api_url": settings.SMM_API_URL or "",
+            "smm_api_key": settings.SMM_API_KEY or ""
         }
         self.load_settings()
 
@@ -80,4 +82,24 @@ class SettingsService:
         self._data["support_admin"] = admin_username.strip()
         self.save_settings()
 
+    def get_smm_api_url(self) -> str:
+        return self._data.get("smm_api_url") or settings.SMM_API_URL or ""
+
+    def set_smm_api_url(self, url: str):
+        self._data["smm_api_url"] = url.strip()
+        self.save_settings()
+
+    def get_smm_api_key(self) -> str:
+        return self._data.get("smm_api_key") or settings.SMM_API_KEY or ""
+
+    def set_smm_api_key(self, key: str):
+        self._data["smm_api_key"] = key.strip()
+        self.save_settings()
+
+    def is_real_smm_configured(self) -> bool:
+        url = self.get_smm_api_url()
+        key = self.get_smm_api_key()
+        return bool(url and key and "smm-provider.com" not in url and key != "your_smm_api_key")
+
 settings_service = SettingsService()
+

@@ -5,5 +5,7 @@
   "support_admin": "@quvonchbek_070",
   "official_channel": "@quvonch_blog",
   "website_url": "https://turfaseen.netlify.app",
-  "referral_reward": 80
+  "referral_reward": 80,
+  "smm_api_url": "https://smm-provider.com/api/v2",
+  "smm_api_key": "your_smm_api_key"
 }

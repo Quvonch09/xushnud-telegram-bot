@@ -17,4 +17,7 @@ class AdminStates(StatesGroup):
     waiting_for_card_number = State()
     waiting_for_card_comment = State()
     waiting_for_start_message = State()
+    waiting_for_smm_api_url = State()
+    waiting_for_smm_api_key = State()
+
 

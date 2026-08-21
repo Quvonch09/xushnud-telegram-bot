@@ -245,14 +245,15 @@ def get_admin_main_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="✉️ Start xabari", callback_data="adm_start_menu", style="primary")
         ],
         [
-            InlineKeyboardButton(text="💰 Balans qo'shish", callback_data="adm_add_bal", style="primary"),
-            InlineKeyboardButton(text="📊 Statistika", callback_data="adm_stats", style="primary")
+            InlineKeyboardButton(text="⚙️ SMM API sozlamalari", callback_data="adm_smm_menu", style="primary"),
+            InlineKeyboardButton(text="💰 Balans qo'shish", callback_data="adm_add_bal", style="primary")
         ],
         [
-            InlineKeyboardButton(text="📢 Kanallar ro'yxati", callback_data="adm_channels", style="primary"),
-            InlineKeyboardButton(text="📋 Audit jurnali", callback_data="adm_audit_logs", style="primary")
+            InlineKeyboardButton(text="📊 Statistika", callback_data="adm_stats", style="primary"),
+            InlineKeyboardButton(text="📢 Kanallar ro'yxati", callback_data="adm_channels", style="primary")
         ],
         [
+            InlineKeyboardButton(text="📋 Audit jurnali", callback_data="adm_audit_logs", style="primary"),
             InlineKeyboardButton(text="🚪 Chiqish", callback_data="adm_exit", style="primary")
         ]
     ])
@@ -285,3 +286,21 @@ def get_admin_start_msg_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="⬅️ Orqaga", callback_data="adm_back_to_main", style="primary")
         ]
     ])
+
+
+def get_admin_smm_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="✍️ SMM API URL o'zgartirish", callback_data="adm_edit_smm_url", style="primary")
+        ],
+        [
+            InlineKeyboardButton(text="✍️ SMM API Key o'zgartirish", callback_data="adm_edit_smm_key", style="primary")
+        ],
+        [
+            InlineKeyboardButton(text="💰 SMM Provayder balansini tekshirish", callback_data="adm_check_smm_bal", style="primary")
+        ],
+        [
+            InlineKeyboardButton(text="⬅️ Orqaga", callback_data="adm_back_to_main", style="primary")
+        ]
+    ])
+

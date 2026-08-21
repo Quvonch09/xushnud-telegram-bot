@@ -4,6 +4,7 @@ from typing import Optional, Dict, Any
 from loguru import logger
 from bot.config import settings
 from bot.services.mock_provider import mock_provider
+from bot.services.settings_service import settings_service
 
 class SmmProviderClient:
     """
@@ -16,12 +17,18 @@ class SmmProviderClient:
     - 👤 Obunachilar (Followers/Members)
     """
     def __init__(self):
-        self.api_url = settings.SMM_API_URL
-        self.api_key = settings.SMM_API_KEY
         self.proxy = settings.PROXY_URL or None
 
+    @property
+    def api_url(self) -> str:
+        return settings_service.get_smm_api_url()
+
+    @property
+    def api_key(self) -> str:
+        return settings_service.get_smm_api_key()
+
     def is_configured(self) -> bool:
-        return bool(self.api_url and self.api_key and "smm-provider.com" not in self.api_url)
+        return settings_service.is_real_smm_configured()
 
     async def add_order(
         self,
@@ -56,6 +63,7 @@ class SmmProviderClient:
             "link": link,
             "quantity": quantity
         }
+
 
         # Extra params for Reactions & Poll votes
         if reaction:

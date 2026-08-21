@@ -6,6 +6,7 @@ from .admin_service import admin_service, AdminService
 from .audit_log import audit_service, AuditLogService
 from .smm_provider import smm_provider, SmmProviderClient
 from .settings_service import settings_service, SettingsService
+from .order_status_worker import start_order_status_worker, sync_user_orders, sync_all_active_orders
 
 # Alias for backwards compatibility
 smm_service = smm_provider
@@ -27,6 +28,10 @@ __all__ = [
     "SmmProviderClient",
     "smm_service",
     "settings_service",
-    "SettingsService"
+    "SettingsService",
+    "start_order_status_worker",
+    "sync_user_orders",
+    "sync_all_active_orders"
 ]
+
 
